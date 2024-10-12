@@ -1,4 +1,4 @@
-package ru.fintech.food_service
+package ru.fintech.food.service
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest

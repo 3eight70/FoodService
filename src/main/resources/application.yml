@@ -1,0 +1,10 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/userapp
+    username: postgres
+    password: gbhfns
+    driverClassName: org.postgresql.Driver
+  data:
+    redis:
+      host: localhost
+      port: 6379

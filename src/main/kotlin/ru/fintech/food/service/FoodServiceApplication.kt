@@ -1,4 +1,4 @@
-package ru.fintech.food_service
+package ru.fintech.food.service
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
