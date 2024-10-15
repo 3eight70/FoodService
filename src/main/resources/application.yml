@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/userapp
+    url: jdbc:postgresql://localhost:5432/food
     username: postgres
     password: gbhfns
     driverClassName: org.postgresql.Driver
@@ -8,3 +8,10 @@ spring:
     redis:
       host: localhost
       port: 6379
+
+authentication:
+  jwt:
+    secret: AbdaasdasdasdasfasgasASFASF
+    expiration: 1h
+  refresh:
+    expiration: 1d
