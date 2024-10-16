@@ -37,12 +37,12 @@ class User(
      * Код подтверждения регистрации
      */
     @Column(name = "verification_code", nullable = true)
-    val verificationCode: String,
+    var verificationCode: String?,
     /**
      * Статус подтверждения аккаунта
      */
     @Column(name = "is_confirmed", nullable = false)
-    val isConfirmed: Boolean = false,
+    var isConfirmed: Boolean = false,
     /**
      * Пароль
      */

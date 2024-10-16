@@ -6,5 +6,6 @@ class UserDto (
     val id: UUID,
     val email: String,
     val phoneNumber: String,
-    val role: RoleEnum
+    val role: RoleEnum,
+    val isConfirmed: Boolean
 )

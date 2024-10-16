@@ -9,9 +9,22 @@ spring:
       host: localhost
       port: 6379
 
+  mail:
+    password: ${mail.password}
+    username: ${mail.username}
+    host: ${mail.host}
+    port: ${mail.port}
+    protocol: smtp
+
 authentication:
   jwt:
     secret: AbdaasdasdasdasfasgasASFASF
     expiration: 1h
   refresh:
     expiration: 1d
+
+mail:
+  username: username
+  password: password
+  host: host
+  port: 123
