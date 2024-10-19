@@ -10,18 +10,14 @@ import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import ru.fintech.food.service.user.dto.token.TokenResponse
 import ru.fintech.food.service.user.dto.user.LoginCredentials
 import ru.fintech.food.service.user.dto.user.UserDto
 import ru.fintech.food.service.user.dto.user.UserRegistrationModel
 import ru.fintech.food.service.user.service.RefreshTokenService
 import ru.fintech.food.service.user.service.UserService
+import java.util.UUID
 
 @RestController
 @Tag(name = "Пользователь", description = "Отвечает за работу с пользователями")
@@ -72,9 +68,9 @@ class UserController(
     )
     @PostMapping("/verify")
     fun verifyUser(
-        @AuthenticationPrincipal user: UserDto,
+        @RequestParam("userId") @Parameter(description = "Идентификатор пользователя") userId: UUID,
         @RequestParam("code") @Parameter(description = "Код подтверждения аккаунта") code: String
-    ) = ResponseEntity.ok(userService.verifyUser(code))
+    ) = ResponseEntity.ok(userService.verifyUser(userId, code))
 
     @Operation(
         summary = "Валидация access токена",

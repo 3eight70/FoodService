@@ -10,4 +10,5 @@ import java.util.*
 interface RefreshTokenRepository: JpaRepository<RefreshToken, UUID> {
     fun findByUser(user: User): Optional<RefreshToken>
     fun findByToken(token: String): Optional<RefreshToken>
+    fun findByUserId(userId: UUID): Optional<RefreshToken>
 }

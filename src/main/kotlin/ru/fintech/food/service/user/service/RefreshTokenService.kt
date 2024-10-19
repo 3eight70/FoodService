@@ -11,6 +11,7 @@ import ru.fintech.food.service.user.dto.token.TokenResponse
 import ru.fintech.food.service.user.dto.user.LoginCredentials
 import ru.fintech.food.service.user.entity.RefreshToken
 import ru.fintech.food.service.user.exception.ExpiredTokenException
+import ru.fintech.food.service.user.repository.RedisRepository
 import ru.fintech.food.service.user.repository.RefreshTokenRepository
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
@@ -29,7 +30,8 @@ class RefreshTokenServiceImpl(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtTokenUtils: JwtTokenUtils,
     private val userRepository: UserRepository,
-    private val properties: AuthenticationProperties
+    private val properties: AuthenticationProperties,
+    private val redisRepository: RedisRepository
 ) : RefreshTokenService {
     private val log = LoggerFactory.getLogger(this::class.java)
 

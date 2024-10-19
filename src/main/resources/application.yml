@@ -4,27 +4,34 @@ spring:
     username: postgres
     password: gbhfns
     driverClassName: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
   data:
     redis:
       host: localhost
       port: 6379
 
   mail:
-    password: ${mail.password}
-    username: ${mail.username}
-    host: ${mail.host}
-    port: ${mail.port}
+    password: ${mail.password:stub}
+    username: ${mail.username:stub}
+    host: ${mail.host:stub}
+    port: ${mail.port:stub}
     protocol: smtp
 
 authentication:
   jwt:
-    secret: AbdaasdasdasdasfasgasASFASF
+    secret: c2VjcmV0S2V5MTIzNDU2Nzg5MDEyMzQ1Njc4OQBASDASFavsafasfasvbascascasvas
     expiration: 1h
   refresh:
     expiration: 1d
 
 mail:
+  enabled: false
   username: username
   password: password
   host: host
   port: 123
+  url-to-where: http://localhost:8080

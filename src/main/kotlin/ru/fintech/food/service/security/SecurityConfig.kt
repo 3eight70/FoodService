@@ -14,15 +14,20 @@ import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.access.AccessDeniedHandler
 import org.springframework.security.web.authentication.HttpStatusEntryPoint
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
+import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.user.service.UserServiceImpl
+import ru.fintech.food.service.utils.JwtTokenUtils
 
 @EnableWebSecurity
 @Configuration
 class SecurityConfig(
-    private val userServiceImpl: UserServiceImpl
+    private val userServiceImpl: UserServiceImpl,
+    private val jwtTokenUtils: JwtTokenUtils,
+    private val userRepository: UserRepository
 ) {
 
     @Bean
@@ -41,6 +46,13 @@ class SecurityConfig(
             .sessionManagement { configurer ->
                 configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             }
+            .addFilterBefore(
+                JwtTokenFilter(
+                    userRepository = userRepository,
+                    userService = userServiceImpl,
+                    jwtTokenUtils = jwtTokenUtils,
+                ), UsernamePasswordAuthenticationFilter::class.java
+            )
 
         return http.build()
     }

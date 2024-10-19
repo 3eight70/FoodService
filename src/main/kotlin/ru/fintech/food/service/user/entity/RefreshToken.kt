@@ -1,11 +1,6 @@
 package ru.fintech.food.service.user.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.OneToOne
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import org.jetbrains.annotations.NotNull
 import java.time.Instant
 import java.util.*

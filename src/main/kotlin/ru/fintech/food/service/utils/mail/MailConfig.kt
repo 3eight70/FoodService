@@ -7,11 +7,11 @@ import org.springframework.mail.javamail.JavaMailSenderImpl
 import ru.fintech.food.service.configuration.MailProperties
 
 @Configuration
-class MailConfiguration(
+class MailConfig(
     private val properties: MailProperties
 ) {
     @Bean
-    fun mailSender(): JavaMailSender {
+    fun javaMailSender(): JavaMailSender {
         val mailSender = JavaMailSenderImpl()
         mailSender.host = properties.host
         mailSender.port = properties.port

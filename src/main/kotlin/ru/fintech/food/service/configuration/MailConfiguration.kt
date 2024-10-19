@@ -13,9 +13,11 @@ class MailConfiguration
  */
 @ConfigurationProperties("mail")
 class MailProperties(
+    val enabled: Boolean = false,
     val host: String,
     val port: Int,
     val username: String,
     val password: String,
-    val senderName: String = "sender"
+    val senderName: String = "sender",
+    val urlToWhere: String
 )

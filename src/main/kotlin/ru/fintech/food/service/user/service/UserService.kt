@@ -1,5 +1,7 @@
 package ru.fintech.food.service.user.service
 
+import io.jsonwebtoken.ExpiredJwtException
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import ru.fintech.food.service.common.dto.Response
 import ru.fintech.food.service.common.exception.BadRequestException
+import ru.fintech.food.service.configuration.MailProperties
 import ru.fintech.food.service.sender.Sender
 import ru.fintech.food.service.sender.SenderService
 import ru.fintech.food.service.sender.dto.MessageDto
@@ -18,15 +21,17 @@ import ru.fintech.food.service.user.dto.user.UserDto
 import ru.fintech.food.service.user.dto.user.UserRegistrationModel
 import ru.fintech.food.service.user.entity.RefreshToken
 import ru.fintech.food.service.user.entity.User
+import ru.fintech.food.service.user.exception.AccountNotConfirmedException
 import ru.fintech.food.service.user.exception.UserAlreadyExistsException
 import ru.fintech.food.service.user.mapper.UserMapper
+import ru.fintech.food.service.user.repository.RefreshTokenRepository
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
 import java.util.*
 
 interface UserService {
     fun loadUserByUsername(username: String?): UserDetails
-    fun verifyUser(userDto: UserDto, code: String): ResponseEntity<Response>
+    fun verifyUser(userId: UUID, code: String): ResponseEntity<Response>
     fun validateToken(token: String): Boolean
     fun registerUser(registerModel: UserRegistrationModel): TokenResponse
     fun loginUser(loginCredentials: LoginCredentials, refreshToken: RefreshToken): TokenResponse
@@ -38,11 +43,14 @@ class UserServiceImpl(
     private val userRepository: UserRepository,
     private val jwtTokenUtils: JwtTokenUtils,
     private val refreshTokenService: RefreshTokenService,
-    private val senderService: SenderService
+    private val refreshTokenRepository: RefreshTokenRepository,
+    private val senderService: SenderService,
+    private val mailProperties: MailProperties
 ) : UserService, UserDetailsService {
     @Transactional
-    override fun verifyUser(userDto: UserDto, code: String): ResponseEntity<Response> {
-        val user = userRepository.findById(userDto.id).get()
+    override fun verifyUser(userId: UUID, code: String): ResponseEntity<Response> {
+        val user = userRepository.findById(userId)
+            .orElseThrow { UsernameNotFoundException("Пользователь с id: $userId не найден") }
 
         if (user.verificationCode != code)
             throw BadRequestException("Неверно указанный код подтверждения аккаунта")
@@ -60,9 +68,13 @@ class UserServiceImpl(
         )
     }
 
-    override fun validateToken(token: String): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun validateToken(token: String): Boolean =
+        try {
+            jwtTokenUtils.validateToken(token)
+        } catch (e: ExpiredJwtException) {
+            false
+        }
+
 
     @Transactional
     override fun registerUser(registerModel: UserRegistrationModel): TokenResponse {
@@ -81,7 +93,12 @@ class UserServiceImpl(
 
         userRepository.saveAndFlush(user)
 
-        senderService.proxyMessage(createMessageDto(UserMapper.toUserDto(user)))
+        //TODO: Убрать, когда будет настроена почта
+        if (mailProperties.enabled) {
+            senderService.proxyMessage(createMessageDto(UserMapper.toUserDto(user), user.verificationCode))
+        } else {
+            println(user.verificationCode)
+        }
 
         val token = jwtTokenUtils.generateToken(user)
         jwtTokenUtils.saveToken(jwtTokenUtils.getIdFromToken(token), "Valid")
@@ -93,12 +110,51 @@ class UserServiceImpl(
         )
     }
 
-    private fun createMessageDto(userDto: UserDto): MessageDto {
+    override fun loginUser(loginCredentials: LoginCredentials, refreshToken: RefreshToken): TokenResponse {
+        val user = userRepository.findUserByEmail(loginCredentials.email)
+            .orElseThrow { UsernameNotFoundException("Пользователь с почтой: ${loginCredentials.email} не был найден") }
+
+        if (!user.isConfirmed) {
+            throw AccountNotConfirmedException()
+        }
+
+        val token = jwtTokenUtils.generateToken(user)
+
+        jwtTokenUtils.saveToken(jwtTokenUtils.getIdFromToken(token), "Valid")
+
+        return TokenResponse(token, refreshToken.token)
+    }
+
+    override fun logoutUser(token: String): Response {
+        val jwtToken = token.substring(7)
+        val tokenId = jwtTokenUtils.getIdFromToken(jwtToken)
+        val userId = jwtTokenUtils.getUserId(jwtToken)
+
+        val refreshToken = refreshTokenRepository.findByUserId(UUID.fromString(userId.toString()))
+
+        refreshToken.ifPresent { value ->
+            refreshTokenRepository.delete(value)
+        }
+
+        jwtTokenUtils.deleteTokenById(tokenId)
+
+        return Response(
+            status = HttpStatus.OK.value(),
+            message = "Пользователь успешно вышел с аккаунта"
+        )
+    }
+
+    override fun loadUserByUsername(username: String?): UserDetails =
+        userRepository.findUserByEmail(username!!)
+            .orElseThrow { UsernameNotFoundException("Пользователь с почтой: $username не был найден") }
+
+    private fun createMessageDto(userDto: UserDto, verificationCode: String?): MessageDto {
         val content =
             """
                 Эй,<br>
                 Пожалуйста перейдите по ссылке ниже для подтверждения регистрации:<br>
-                <h3><a href=\"[[URL]]\" target=\"_self\">ПОДТВЕРДИ МЕНЯ</a></h3>
+                <h3><a href=\"${mailProperties.urlToWhere}?userId=${userDto.id}?
+                verificationCode=$verificationCode\" target=\"_self\">ПОДТВЕРДИ МЕНЯ</a></h3>
                 Спасибо ;)
             """
 
@@ -109,18 +165,4 @@ class UserServiceImpl(
             senderType = Sender.SenderType.Email
         )
     }
-
-    override fun loginUser(loginCredentials: LoginCredentials, refreshToken: RefreshToken): TokenResponse {
-        TODO("Not yet implemented")
-    }
-
-    override fun logoutUser(token: String): Response {
-        TODO("Not yet implemented")
-    }
-
-    override fun loadUserByUsername(username: String?): UserDetails =
-        userRepository.findUserByEmail(username!!)
-            .orElseThrow { UsernameNotFoundException("Пользователь с почтой: $username не был найден") }
-
-
 }

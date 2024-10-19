@@ -43,10 +43,14 @@ class JwtTokenUtils(
 
     fun getUserId(token: String) = getAllClaims(token)["userId"]
 
+    fun getUserEmail(token: String) = getAllClaims(token).subject
+
+    fun deleteTokenById(tokenId: String) = redisRepository.delete(tokenId)
+
     private fun getAllClaims(token: String) =
         Jwts.parser()
             .verifyWith(key)
             .build()
-            .parseUnsecuredClaims(token)
+            .parseSignedClaims(token)
             .payload
 }
