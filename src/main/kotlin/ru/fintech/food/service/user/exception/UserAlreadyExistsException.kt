@@ -1,3 +1,5 @@
 package ru.fintech.food.service.user.exception
 
-class UserAlreadyExistsException(message: String) : RuntimeException(message)
+import ru.fintech.food.service.common.exception.BadRequestException
+
+class UserAlreadyExistsException(message: String) : BadRequestException(message)

@@ -74,9 +74,10 @@ class ProductCategoryController(
         description = "Позволяет обновить категорию",
         security = [SecurityRequirement(name = "bearerAuth")]
     )
-    fun update(
+    fun updateCategory(
         @AuthenticationPrincipal userDto: UserDto,
+        @Parameter(description = "Идентификатор категории для изменения") @RequestParam(name = "categoryId") categoryId: UUID,
         @Validated @RequestBody categoryRequestDto: ProductCategoryRequestDto
     ) =
-        ResponseEntity.ok(productCategoryService.updateCategory(userDto, categoryRequestDto))
+        ResponseEntity.ok(productCategoryService.updateCategory(userDto, categoryId, categoryRequestDto))
 }

@@ -36,6 +36,7 @@ class SecurityConfig(
             .cors { cors -> cors.disable() }
             .authorizeHttpRequests { requests ->
                 requests
+                    //TODO: Запретить все эндпоинты, которые предназначены только для админов
                     .anyRequest().permitAll()
             }
             .exceptionHandling { exception ->

@@ -20,6 +20,6 @@ class ProductCategory(
     /**
      * Название категории
      */
-    @Column(name = "name", nullable = false)
-    val name: String
+    @Column(name = "name", nullable = false, unique = true)
+    var name: String
 )
