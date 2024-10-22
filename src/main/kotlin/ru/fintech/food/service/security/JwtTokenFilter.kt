@@ -31,10 +31,9 @@ class JwtTokenFilter(
         var authHeader: String? = request.getHeader("Authorization")
         var email: String? = null
         var jwt: String? = null
-        var tokenInRedis = false
         var userDto: UserDto? = null
 
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost")
+        response.setHeader("Access-Control-Allow-Origin", "*")
         response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
         response.setHeader(
             "Access-Control-Allow-Headers",
@@ -49,7 +48,7 @@ class JwtTokenFilter(
             if (authHeader != null && authHeader.startsWith("Bearer ")) {
                 jwt = authHeader.substring(7)
 
-                tokenInRedis = userService.validateToken(jwt)
+                val tokenInRedis = userService.validateToken(jwt)
 
                 if (tokenInRedis) {
                     email = jwtTokenUtils.getUserEmail(jwt)

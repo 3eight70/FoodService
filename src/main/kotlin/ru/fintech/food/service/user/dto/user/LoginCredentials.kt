@@ -6,7 +6,7 @@ import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 
 @Schema(description = "dto для авторизации пользователя")
-class LoginCredentials (
+class LoginCredentials(
     @Schema(description = "Почта пользователя", example = "example@mail.ru")
     @NotNull(message = "Почта должна быть указана")
     @Pattern(regexp = "[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+", message = "Неверный адрес электронной почты")

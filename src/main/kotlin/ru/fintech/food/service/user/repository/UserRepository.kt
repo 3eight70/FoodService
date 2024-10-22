@@ -6,7 +6,7 @@ import ru.fintech.food.service.user.entity.User
 import java.util.*
 
 @Repository
-interface UserRepository: JpaRepository<User, UUID> {
+interface UserRepository : JpaRepository<User, UUID> {
     fun findUserByEmail(email: String): Optional<User>
     fun existsByEmail(email: String): Boolean
     fun existsByPhoneNumber(phoneNumber: String): Boolean

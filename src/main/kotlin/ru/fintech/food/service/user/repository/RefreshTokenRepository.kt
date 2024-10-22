@@ -7,7 +7,7 @@ import ru.fintech.food.service.user.entity.User
 import java.util.*
 
 @Repository
-interface RefreshTokenRepository: JpaRepository<RefreshToken, UUID> {
+interface RefreshTokenRepository : JpaRepository<RefreshToken, UUID> {
     fun findByUser(user: User): Optional<RefreshToken>
     fun findByToken(token: String): Optional<RefreshToken>
     fun findByUserId(userId: UUID): Optional<RefreshToken>
