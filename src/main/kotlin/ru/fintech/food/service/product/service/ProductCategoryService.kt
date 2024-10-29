@@ -1,5 +1,6 @@
 package ru.fintech.food.service.product.service
 
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import ru.fintech.food.service.common.dto.Response
 import ru.fintech.food.service.product.dto.category.ProductCategoryDto
@@ -28,6 +29,8 @@ interface ProductCategoryService {
 class ProductCategoryServiceImpl(
     private val productCategoryRepository: ProductCategoryRepository
 ) : ProductCategoryService {
+    private val log = LoggerFactory.getLogger(this::class.java)
+
     override fun getCategories(): List<ProductCategoryDto> =
         productCategoryRepository.findAll()
             .map(ProductCategoryMapper::toProductCategoryDto)
@@ -39,6 +42,8 @@ class ProductCategoryServiceImpl(
         )
 
     override fun createCategory(userDto: UserDto, categoryRequestDto: ProductCategoryRequestDto): ProductCategoryDto {
+        log.info("Пользователь {} создал категорию со следующими данными: {}", userDto, categoryRequestDto)
+
         productCategoryRepository.findByName(categoryRequestDto.name)
             .ifPresent { throw ProductCategoryAlreadyExistsException(categoryRequestDto.name) }
 
@@ -54,6 +59,8 @@ class ProductCategoryServiceImpl(
         categoryId: UUID,
         categoryRequestDto: ProductCategoryRequestDto
     ): ProductCategoryDto {
+        log.info("Пользователь {} изменил категорию с идентификатором {}", userDto, categoryId)
+
         productCategoryRepository.findByName(categoryRequestDto.name)
             .ifPresent { throw ProductCategoryAlreadyExistsException(categoryRequestDto.name) }
 
@@ -68,6 +75,8 @@ class ProductCategoryServiceImpl(
     }
 
     override fun deleteCategory(userDto: UserDto, categoryId: UUID): Response {
+        log.info("Пользователь {} удалил категорию с идентификатором {}", userDto, categoryId)
+
         val category = productCategoryRepository.findById(categoryId)
             .orElseThrow { ProductCategoryNotFoundException(categoryId) }
 
