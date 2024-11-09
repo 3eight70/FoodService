@@ -1,11 +1,10 @@
 package ru.fintech.food.service.security
 
+import java.time.Instant
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
-import org.springframework.security.authentication.AuthenticationManager
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.config.http.SessionCreationPolicy
@@ -19,13 +18,11 @@ import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 import ru.fintech.food.service.user.repository.UserRepository
-import ru.fintech.food.service.user.service.UserServiceImpl
 import ru.fintech.food.service.utils.JwtTokenUtils
 
 @EnableWebSecurity
 @Configuration
 class SecurityConfig(
-    private val userServiceImpl: UserServiceImpl,
     private val jwtTokenUtils: JwtTokenUtils,
     private val userRepository: UserRepository
 ) {
@@ -37,6 +34,12 @@ class SecurityConfig(
             .authorizeHttpRequests { requests ->
                 requests
                     //TODO: Запретить все эндпоинты, которые предназначены только для админов
+                    .requestMatchers(HttpMethod.POST, "/v1/product").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/v1/product").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/v1/product").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/v1/category").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.PUT, "/v1/category").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/v1/category").hasRole("ADMIN")
                     .anyRequest().permitAll()
             }
             .exceptionHandling { exception ->
@@ -50,7 +53,6 @@ class SecurityConfig(
             .addFilterBefore(
                 JwtTokenFilter(
                     userRepository = userRepository,
-                    userService = userServiceImpl,
                     jwtTokenUtils = jwtTokenUtils,
                 ), UsernamePasswordAuthenticationFilter::class.java
             )
@@ -60,19 +62,6 @@ class SecurityConfig(
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()
-
-    @Bean
-    fun authenticationManager(configuration: AuthenticationConfiguration): AuthenticationManager =
-        configuration.authenticationManager
-
-    @Bean
-    fun daoAuthenticationProvider(): DaoAuthenticationProvider {
-        val provider = DaoAuthenticationProvider()
-        provider.setPasswordEncoder(passwordEncoder())
-        provider.setUserDetailsService(userServiceImpl)
-
-        return provider
-    }
 
     @Bean
     fun corsFilter(): CorsFilter {
@@ -92,7 +81,7 @@ class SecurityConfig(
             response.contentType = "application/json"
             response.characterEncoding = "UTF-8"
             response.status = HttpStatus.FORBIDDEN.value()
-            response.writer.write("{\"status\": \"403\", \"message\": \"У вас нет прав доступа\"}")
+            response.writer.write("{\"status\": \"403\", \"message\": \"У вас нет прав доступа\", \"timestamp\": \"${Instant.now()}\"}")
             response.writer.flush()
         }
     }

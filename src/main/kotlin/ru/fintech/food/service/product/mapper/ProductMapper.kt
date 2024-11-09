@@ -37,4 +37,14 @@ object ProductMapper {
             imageId = productRequestDto.imageId,
             available = productRequestDto.available
         )
+
+    fun fullProductDtoToShort(fullProductDto: FullProductDto): ShortProductDto =
+        ShortProductDto(
+            id = fullProductDto.id,
+            name = fullProductDto.name,
+            description = fullProductDto.description,
+            price = fullProductDto.price,
+            imageId = fullProductDto.imageId,
+            available = fullProductDto.available
+        )
 }

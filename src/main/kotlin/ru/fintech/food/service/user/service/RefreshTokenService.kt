@@ -1,5 +1,7 @@
 package ru.fintech.food.service.user.service
 
+import java.time.Instant
+import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -11,12 +13,9 @@ import ru.fintech.food.service.user.dto.token.TokenResponse
 import ru.fintech.food.service.user.dto.user.LoginCredentials
 import ru.fintech.food.service.user.entity.RefreshToken
 import ru.fintech.food.service.user.exception.ExpiredTokenException
-import ru.fintech.food.service.user.repository.RedisRepository
 import ru.fintech.food.service.user.repository.RefreshTokenRepository
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
-import java.time.Instant
-import java.util.*
 
 interface RefreshTokenService {
     fun verifyExpiration(token: RefreshToken): RefreshToken?
@@ -30,8 +29,7 @@ class RefreshTokenServiceImpl(
     private val refreshTokenRepository: RefreshTokenRepository,
     private val jwtTokenUtils: JwtTokenUtils,
     private val userRepository: UserRepository,
-    private val properties: AuthenticationProperties,
-    private val redisRepository: RedisRepository
+    private val properties: AuthenticationProperties
 ) : RefreshTokenService {
     private val log = LoggerFactory.getLogger(this::class.java)
 
@@ -78,7 +76,7 @@ class RefreshTokenServiceImpl(
             .let(::verifyExpiration)?.user
             ?.let { user ->
                 val accessToken = jwtTokenUtils.generateToken(user)
-                jwtTokenUtils.saveToken(jwtTokenUtils.getIdFromToken(accessToken), "Valid")
+                jwtTokenUtils.saveToken(jwtTokenUtils.getIdFromToken(accessToken))
 
                 ResponseEntity.ok(TokenResponse(accessToken, refreshTokenDto.token))
             } ?: throw ExpiredTokenException("Срок действия токена истек")

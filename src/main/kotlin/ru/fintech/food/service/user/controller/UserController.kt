@@ -4,23 +4,24 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import ru.fintech.food.service.common.dto.Response
 import ru.fintech.food.service.user.dto.token.TokenResponse
 import ru.fintech.food.service.user.dto.user.LoginCredentials
 import ru.fintech.food.service.user.dto.user.UserRegistrationModel
 import ru.fintech.food.service.user.service.RefreshTokenService
 import ru.fintech.food.service.user.service.UserService
-import java.util.*
 
 @RestController
 @Tag(name = "Пользователь", description = "Отвечает за работу с пользователями")
@@ -28,7 +29,6 @@ import java.util.*
 class UserController(
     private val userService: UserService,
     private val refreshTokenService: RefreshTokenService,
-    private val passwordEncoder: PasswordEncoder,
     private val authenticationManager: AuthenticationManager
 ) {
 
@@ -59,9 +59,7 @@ class UserController(
         description = "Позволяет пользователю зарегистрироваться"
     )
     @PostMapping("/register")
-    fun registerUser(@Valid @RequestBody registerModel: UserRegistrationModel): ResponseEntity<TokenResponse> {
-        registerModel.password = passwordEncoder.encode(registerModel.password)
-
+    fun registerUser(@Valid @RequestBody registerModel: UserRegistrationModel): ResponseEntity<Response> {
         return ResponseEntity.ok(userService.registerUser(registerModel))
     }
 
@@ -82,4 +80,12 @@ class UserController(
     @GetMapping("/validate")
     fun validateToken(@RequestParam("token") @Parameter(description = "access токен") token: String) =
         ResponseEntity.ok(userService.validateToken(token))
+
+    @Operation(
+        summary = "Завершение текущей сессии",
+        description = "Позволяет пользователю обнулить текущую сессию"
+    )
+    @PostMapping("/logout")
+    fun logoutUser(@RequestHeader(value = "Authorization") token: String) =
+        ResponseEntity.ok(userService.logoutUser(token))
 }

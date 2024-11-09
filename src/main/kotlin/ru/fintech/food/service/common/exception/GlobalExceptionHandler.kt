@@ -1,21 +1,87 @@
 package ru.fintech.food.service.common.exception
 
 import io.jsonwebtoken.security.SignatureException
+import jakarta.validation.ConstraintViolationException
+import java.time.Instant
+import java.time.format.DateTimeFormatter
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.authentication.DisabledException
+import org.springframework.validation.FieldError
 import org.springframework.web.HttpMediaTypeNotAcceptableException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingRequestHeaderException
 import org.springframework.web.bind.annotation.ControllerAdvice
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.multipart.support.MissingServletRequestPartException
+import ru.fintech.food.service.common.dto.ErrorDto
+import ru.fintech.food.service.common.dto.ErrorResponse
 import ru.fintech.food.service.common.dto.Response
 
 
 @ControllerAdvice
 class GlobalExceptionHandler {
     private val log = LoggerFactory.getLogger(this::class.java)
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(e: MethodArgumentNotValidException): ResponseEntity<ErrorResponse> {
+        log.debug("Ошибка валидации: {}", e.bindingResult.allErrors.map { it.defaultMessage }, e)
+
+        val errors: MutableList<ErrorDto> = mutableListOf()
+        for (error in e.bindingResult.fieldErrors) {
+            val fieldName = error.field
+            val errorMessage = error.defaultMessage ?: "Ошибка валидации"
+            errors.add(ErrorDto(fieldName, errorMessage))
+        }
+
+        val errorResponse = ErrorResponse(
+            status = HttpStatus.BAD_REQUEST.value(),
+            message = "Ошибка валидации",
+            errors = errors
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+
+    @ExceptionHandler(ConstraintViolationException::class)
+    fun handleConstraintViolationException(e: ConstraintViolationException): ResponseEntity<ErrorResponse> {
+        val errors: MutableList<ErrorDto> = mutableListOf()
+        for (violation in e.constraintViolations) {
+            errors.add(ErrorDto(violation.propertyPath.toString(), violation.message))
+        }
+
+        val errorResponse = ErrorResponse(
+            HttpStatus.BAD_REQUEST.value(),
+            "Ошибка валидации",
+            errors = errors
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<Response> {
+        val errorResponse = Response(
+            HttpStatus.BAD_REQUEST.value(),
+            "Ошибка в теле запроса: ${e.localizedMessage}",
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(DisabledException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleDisabledException(e: DisabledException): ResponseEntity<Response> =
+        ResponseEntity(
+            Response(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Сперва подтвердите свой аккаунт",
+            ), HttpStatus.UNAUTHORIZED
+        )
 
     @ExceptionHandler(SignatureException::class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
@@ -24,7 +90,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             Response(
                 HttpStatus.UNAUTHORIZED.value(),
-                "Неверная подпись токена авторизации"
+                "Неверная подпись токена авторизации",
             ), HttpStatus.UNAUTHORIZED
         )
     }
@@ -36,7 +102,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             Response(
                 HttpStatus.BAD_REQUEST.value(),
-                e.message
+                e.message,
             ), HttpStatus.BAD_REQUEST
         )
     }
@@ -48,7 +114,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             Response(
                 HttpStatus.UNAUTHORIZED.value(),
-                "Отсутствует header Authorization"
+                "Отсутствует header Authorization",
             ), HttpStatus.UNAUTHORIZED
         )
     }
@@ -60,7 +126,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             Response(
                 HttpStatus.BAD_REQUEST.value(),
-                e.message
+                e.message,
             ), HttpStatus.BAD_REQUEST
         )
     }
@@ -70,7 +136,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             Response(
                 HttpStatus.NOT_FOUND.value(),
-                e.message
+                e.message,
             ),
             HttpStatus.NOT_FOUND
         )
@@ -81,7 +147,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             Response(
                 HttpStatus.BAD_REQUEST.value(),
-                e.message
+                e.message,
             ),
             HttpStatus.BAD_REQUEST
         )
@@ -94,7 +160,7 @@ class GlobalExceptionHandler {
         return ResponseEntity(
             Response(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Что-то пошло не так"
+                "Что-то пошло не так",
             ),
             HttpStatus.INTERNAL_SERVER_ERROR
         )
