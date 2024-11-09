@@ -27,5 +27,9 @@ class ProductRequestDto (
     val imageId: UUID,
     @Schema(description = "Находится в наличии", example = "true")
     @NotNull(message = "Статус нахождения в наличии должен быть указан")
-    val isAvailable: Boolean
+    val available: Boolean,
+    @Schema(description = "Идентификаторы категорий")
+    @NotNull(message = "Категории должны быть указаны")
+    @Size(min = 1, message = "Множество должно хранить хотя бы 1 элемент")
+    val categoryIds: Set<UUID>
 )

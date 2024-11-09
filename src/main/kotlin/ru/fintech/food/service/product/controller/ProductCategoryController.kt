@@ -32,8 +32,7 @@ class ProductCategoryController(
         summary = "Получение всех категорий продуктов",
         description = "Позволяет получить все категории продуктов"
     )
-    fun getCategories() =
-        ResponseEntity.ok(productCategoryService.getCategories())
+    fun getCategories() = ResponseEntity.ok(productCategoryService.getCategories())
 
     @GetMapping("/{categoryId}")
     @Operation(
@@ -53,8 +52,7 @@ class ProductCategoryController(
     fun deleteCategory(
         @AuthenticationPrincipal userDto: UserDto,
         @Parameter(description = "Идентификатор категории") @RequestParam(name = "categoryId") categoryId: UUID
-    ) =
-        ResponseEntity.ok(productCategoryService.deleteCategory(userDto, categoryId))
+    ) = ResponseEntity.ok(productCategoryService.deleteCategory(userDto, categoryId))
 
     @PostMapping
     @Operation(
@@ -65,8 +63,7 @@ class ProductCategoryController(
     fun createCategory(
         @AuthenticationPrincipal userDto: UserDto,
         @Validated @RequestBody categoryRequestDto: ProductCategoryRequestDto
-    ) =
-        ResponseEntity.ok(productCategoryService.createCategory(userDto, categoryRequestDto))
+    ) = ResponseEntity.ok(productCategoryService.createCategory(userDto, categoryRequestDto))
 
     @PutMapping
     @Operation(

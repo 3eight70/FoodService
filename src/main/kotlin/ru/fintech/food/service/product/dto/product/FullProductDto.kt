@@ -19,7 +19,7 @@ class FullProductDto(
     @Schema(description = "Идентификатор изображения", example = "3c03e1de-2177-43b2-aecb-aa4e9ff66a23")
     val imageId: UUID,
     @Schema(description = "Находится в наличии", example = "true")
-    val isAvailable: Boolean,
+    val available: Boolean,
     @ArraySchema(
         arraySchema = Schema(
             description = "Список категорий продуктов",

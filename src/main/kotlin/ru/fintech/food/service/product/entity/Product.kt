@@ -25,28 +25,29 @@ class Product(
     /**
      * Название позиции
      */
-    @Column(name = "name", nullable = false)
-    val name: String,
+    @Column(name = "name", nullable = false, unique = true)
+    var name: String,
     /**
      * Описание позиции меню
      */
     @Column(name = "description", nullable = false)
-    val description: String,
+    var description: String,
     /**
      * Цена позиции
      */
     @Column(name = "price", nullable = false)
-    val price: BigDecimal,
+    var price: BigDecimal,
     /**
      * Идентификатор изображения
      */
     //TODO: Реализовать S3 хранилище - minio и отдельную бд для хранения id изображения в minio
     @Column(name = "image_id", nullable = false)
-    val imageId: UUID,
+    var imageId: UUID,
     /**
      * Есть в наличии
      */
-    val isAvailable: Boolean,
+    @Column(name = "available", nullable = false)
+    var available: Boolean = false,
     /**
      * Категории, к которым относится позиция
      */
@@ -56,5 +57,5 @@ class Product(
         joinColumns = [JoinColumn(name = "product_id")],
         inverseJoinColumns = [JoinColumn(name = "category_id")]
     )
-    val categories: Set<ProductCategory> = HashSet()
+    var categories: Set<ProductCategory> = HashSet()
 )
