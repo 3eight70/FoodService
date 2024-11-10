@@ -5,13 +5,13 @@ import ru.fintech.food.service.product.dto.category.ProductCategoryRequestDto
 import ru.fintech.food.service.product.entity.ProductCategory
 
 object ProductCategoryMapper {
-    fun toProductCategoryDto(category: ProductCategory) =
+    fun ProductCategoryDto(category: ProductCategory) =
         ProductCategoryDto(
             id = category.id,
             name = category.name
         )
 
-    fun toEntity(categoryRequestDto: ProductCategoryRequestDto) =
+    fun ProductCategory(categoryRequestDto: ProductCategoryRequestDto) =
         ProductCategory(
             name = categoryRequestDto.name
         )

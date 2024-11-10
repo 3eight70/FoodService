@@ -1,6 +1,5 @@
 package ru.fintech.food.service.common.aop
 
-import java.util.UUID
 import org.aspectj.lang.JoinPoint
 import org.aspectj.lang.annotation.After
 import org.aspectj.lang.annotation.Aspect
@@ -9,6 +8,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import ru.fintech.food.service.product.dto.product.ProductRequestDto
 import ru.fintech.food.service.user.dto.user.UserDto
+import java.util.UUID
 
 @Aspect
 @Component

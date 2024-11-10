@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size
 
 @Schema(description = "dto для создания/изменения категорий")
 class ProductCategoryRequestDto @JsonCreator constructor(
-    @Schema(description = "Название категории", example = "Суп")
+    @field:Schema(description = "Название категории", example = "Суп")
     @field:NotNull(message = "Название должно быть заполнено")
     @field:NotBlank(message = "Название должно быть заполнено")
     @field:Size(min = 1)

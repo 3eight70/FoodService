@@ -1,6 +1,6 @@
 package ru.fintech.food.service.product.service
 
-import java.util.UUID
+import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import ru.fintech.food.service.common.dto.Response
+import ru.fintech.food.service.image.exception.ImageNotFoundException
+import ru.fintech.food.service.image.repository.ImageRepository
 import ru.fintech.food.service.product.dto.product.FullProductDto
 import ru.fintech.food.service.product.dto.product.ProductRequestDto
 import ru.fintech.food.service.product.dto.product.ShortProductDto
@@ -19,6 +21,7 @@ import ru.fintech.food.service.product.repository.ProductCategoryRepository
 import ru.fintech.food.service.product.repository.ProductRepository
 import ru.fintech.food.service.product.repository.RedisProductRepository
 import ru.fintech.food.service.user.dto.user.UserDto
+import java.util.UUID
 
 interface ProductService {
     fun getProducts(pageable: Pageable): Page<ShortProductDto>
@@ -34,7 +37,8 @@ interface ProductService {
 class ProductServiceImpl(
     private val productRepository: ProductRepository,
     private val productCategoryRepository: ProductCategoryRepository,
-    private val redisProductRepository: RedisProductRepository
+    private val redisProductRepository: RedisProductRepository,
+    private val imageRepository: ImageRepository
 ) : ProductService {
     private val log = LoggerFactory.getLogger(ProductServiceImpl::class.java)
 
@@ -42,7 +46,7 @@ class ProductServiceImpl(
         val cachedProducts = redisProductRepository.getAllMenuItems()
 
         if (cachedProducts.isNotEmpty()) {
-            val shortProductDtos = cachedProducts.map { ProductMapper.fullProductDtoToShort(it) }
+            val shortProductDtos = cachedProducts.map { ProductMapper.ShortProductDto(it) }
             log.debug("Возвращаем кэшированные значения в размере: {}", shortProductDtos.size)
 
             return PageImpl(shortProductDtos, pageable, shortProductDtos.size.toLong())
@@ -50,11 +54,11 @@ class ProductServiceImpl(
 
         val products = productRepository.findAll(pageable)
 
-        val shortProductDtos = products.content.map { ProductMapper.productToShortDto(it) }
+        val shortProductDtos = products.content.map { ProductMapper.ShortProductDto(it) }
         log.debug("Возвращаем значения из бд в размере: {}", products.size)
 
         products.content.forEach { product ->
-            val fullProductDto = ProductMapper.productToFullDto(product)
+            val fullProductDto = ProductMapper.FullProductDto(product)
             redisProductRepository.saveMenuItem(product.id.toString(), fullProductDto)
         }
 
@@ -68,7 +72,7 @@ class ProductServiceImpl(
             return cachedProduct
         }
 
-        return ProductMapper.productToFullDto(
+        return ProductMapper.FullProductDto(
             productRepository.findById(productId)
                 .orElseThrow { ProductNotFoundException(productId) }
         )
@@ -79,7 +83,7 @@ class ProductServiceImpl(
 
         return PageImpl(
             products.content
-                .map(ProductMapper::productToShortDto),
+                .map(ProductMapper::ShortProductDto),
             pageable,
             products.totalElements
         )
@@ -87,19 +91,22 @@ class ProductServiceImpl(
 
     override fun getUnavailableProducts(): List<ShortProductDto> =
         productRepository.findByAvailableIsFalse()
-            .map(ProductMapper::productToShortDto)
+            .map(ProductMapper::ShortProductDto)
 
+    @Transactional
     override fun updateProduct(userDto: UserDto, productId: UUID, productDto: ProductRequestDto): ShortProductDto {
         val product = productRepository.findById(productId)
             .orElseThrow { ProductNotFoundException(productId) }
 
         validateCategoryIds(productDto)
+        if (!imageRepository.existsById(productDto.imageId)) {
+            throw ImageNotFoundException(productDto.imageId)
+        }
 
         val categories = productCategoryRepository.findAllById(productDto.categoryIds.map { UUID.fromString(it) })
 
         product.name = productDto.name
         product.price = productDto.price
-        // TODO: Проверка imageId
         product.imageId = productDto.imageId
         product.description = productDto.description
         product.available = productDto.available
@@ -107,35 +114,39 @@ class ProductServiceImpl(
 
         productRepository.save(product)
 
-        val updatedProductDto = ProductMapper.productToFullDto(product)
+        val updatedProductDto = ProductMapper.FullProductDto(product)
         redisProductRepository.saveMenuItem(productId.toString(), updatedProductDto)
 
-        return ProductMapper.fullProductDtoToShort(updatedProductDto)
+        return ProductMapper.ShortProductDto(updatedProductDto)
     }
 
+    @Transactional
     override fun createProduct(userDto: UserDto, productDto: ProductRequestDto): ShortProductDto {
         productRepository.findProductByName(productDto.name)
             ?.let { throw ProductAlreadyExistsException(productDto.name) }
 
         validateCategoryIds(productDto)
 
-        // TODO: Проверка imageId
-        val product = ProductMapper.productRequestDtoToProduct(productDto)
+        if (!imageRepository.existsById(productDto.imageId)) {
+            throw ImageNotFoundException(productDto.imageId)
+        }
+
+        val product = ProductMapper.Product(productDto)
 
         productRepository.save(product)
 
-        val createdProductDto = ProductMapper.productToFullDto(product)
+        val createdProductDto = ProductMapper.FullProductDto(product)
         redisProductRepository.saveMenuItem(product.id.toString(), createdProductDto)
 
-        return ProductMapper.fullProductDtoToShort(createdProductDto)
+        return ProductMapper.ShortProductDto(createdProductDto)
     }
 
+    @Transactional
     override fun deleteProduct(userDto: UserDto, productId: UUID): Response {
         val product = productRepository.findById(productId)
             .orElseThrow { ProductNotFoundException(productId) }
 
         productRepository.delete(product)
-
         redisProductRepository.deleteMenuItem(productId.toString())
 
         return Response(

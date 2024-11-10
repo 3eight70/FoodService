@@ -6,7 +6,7 @@ import ru.fintech.food.service.product.dto.product.ShortProductDto
 import ru.fintech.food.service.product.entity.Product
 
 object ProductMapper {
-    fun productToShortDto(product: Product): ShortProductDto =
+    fun ShortProductDto(product: Product): ShortProductDto =
         ShortProductDto(
             id = product.id,
             name = product.name,
@@ -16,7 +16,7 @@ object ProductMapper {
             available = product.available
         )
 
-    fun productToFullDto(product: Product): FullProductDto =
+    fun FullProductDto(product: Product): FullProductDto =
         FullProductDto(
             id = product.id,
             name = product.name,
@@ -25,11 +25,11 @@ object ProductMapper {
             imageId = product.imageId,
             available = product.available,
             categories = product.categories
-                .map(ProductCategoryMapper::toProductCategoryDto)
+                .map(ProductCategoryMapper::ProductCategoryDto)
                 .toSet()
         )
 
-    fun productRequestDtoToProduct(productRequestDto: ProductRequestDto): Product =
+    fun Product(productRequestDto: ProductRequestDto): Product =
         Product(
             name = productRequestDto.name,
             description = productRequestDto.description,
@@ -38,7 +38,7 @@ object ProductMapper {
             available = productRequestDto.available
         )
 
-    fun fullProductDtoToShort(fullProductDto: FullProductDto): ShortProductDto =
+    fun ShortProductDto(fullProductDto: FullProductDto): ShortProductDto =
         ShortProductDto(
             id = fullProductDto.id,
             name = fullProductDto.name,

@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "Ответ с токенами")
 class TokenResponse(
-    @Schema(description = "jwt токен")
+    @field:Schema(description = "jwt токен")
     val accessToken: String,
-    @Schema(description = "refresh токен")
+    @field:Schema(description = "refresh токен")
     val refreshToken: String
 )

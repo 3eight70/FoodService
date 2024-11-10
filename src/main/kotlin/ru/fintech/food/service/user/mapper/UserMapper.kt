@@ -4,7 +4,7 @@ import ru.fintech.food.service.user.dto.user.UserDto
 import ru.fintech.food.service.user.entity.User
 
 object UserMapper {
-    fun toUserDto(user: User): UserDto =
+    fun UserDto(user: User): UserDto =
         UserDto(
             id = user.id,
             email = user.email,

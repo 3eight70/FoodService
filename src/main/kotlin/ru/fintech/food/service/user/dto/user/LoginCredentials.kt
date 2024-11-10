@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size
 
 @Schema(description = "dto для авторизации пользователя")
 class LoginCredentials(
-    @Schema(description = "Почта пользователя", example = "example@mail.ru")
+    @field:Schema(description = "Почта пользователя", example = "example@mail.ru")
     @field:NotNull(message = "Почта должна быть указана")
     @field:Pattern(regexp = "[a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9_-]+", message = "Неверный адрес электронной почты")
     @field:Size(min = 1, message = "Минимальная длина электронной почты не менее 1 символа")
@@ -15,6 +15,6 @@ class LoginCredentials(
 
     @field:NotNull(message = "Пароль должен быть указан")
     @field:Size(min = 1, message = "Минимальная длина пароля равна 1")
-    @Schema(description = "Пароль пользователя", example = "qwerty12345")
+    @field:Schema(description = "Пароль пользователя", example = "qwerty12345")
     val password: String
 )

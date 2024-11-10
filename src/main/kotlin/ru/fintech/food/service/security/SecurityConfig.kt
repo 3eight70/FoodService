@@ -1,6 +1,5 @@
 package ru.fintech.food.service.security
 
-import java.time.Instant
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -19,6 +18,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
+import java.time.Instant
 
 @EnableWebSecurity
 @Configuration
@@ -33,13 +33,14 @@ class SecurityConfig(
             .cors { cors -> cors.disable() }
             .authorizeHttpRequests { requests ->
                 requests
-                    //TODO: Запретить все эндпоинты, которые предназначены только для админов
                     .requestMatchers(HttpMethod.POST, "/v1/product").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/v1/product").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/v1/product").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.POST, "/v1/category").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.PUT, "/v1/category").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/v1/category").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/v1/image").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.DELETE, "/v1/image").hasRole("ADMIN")
                     .anyRequest().permitAll()
             }
             .exceptionHandling { exception ->

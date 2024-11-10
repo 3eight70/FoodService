@@ -1,6 +1,5 @@
 package ru.fintech.food.service.user.service
 
-import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -24,6 +23,7 @@ import ru.fintech.food.service.user.mapper.UserMapper
 import ru.fintech.food.service.user.repository.RefreshTokenRepository
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
+import java.util.UUID
 
 interface UserService {
     fun loadUserByUsername(username: String?): UserDetails
@@ -83,7 +83,7 @@ class UserServiceImpl(
 
         //TODO: Убрать, когда будет настроена почта и добавить асинхронщину
         if (mailProperties.enabled) {
-            senderService.proxyMessage(UserMapper.toUserDto(user), user.verificationCode!!)
+            senderService.proxyMessage(UserMapper.UserDto(user), user.verificationCode!!)
         } else {
             println(user.verificationCode)
         }
@@ -94,6 +94,7 @@ class UserServiceImpl(
         )
     }
 
+    @Transactional
     override fun loginUser(loginCredentials: LoginCredentials, refreshToken: RefreshToken): TokenResponse {
         val user = userRepository.findUserByEmail(loginCredentials.email)
             .orElseThrow { UsernameNotFoundException("Пользователь с почтой: ${loginCredentials.email} не был найден") }
@@ -109,6 +110,7 @@ class UserServiceImpl(
         return TokenResponse(token, refreshToken.token)
     }
 
+    @Transactional
     override fun logoutUser(token: String): Response {
         val jwtToken = token.removePrefix("Bearer ").trim()
         val tokenId = jwtTokenUtils.getIdFromToken(jwtToken)

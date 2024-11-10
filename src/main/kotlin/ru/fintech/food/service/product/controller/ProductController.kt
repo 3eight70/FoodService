@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController
 import ru.fintech.food.service.product.dto.product.ProductRequestDto
 import ru.fintech.food.service.product.service.ProductService
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.*
+import java.util.UUID
 
 @RestController
 @RequestMapping("/v1/product")

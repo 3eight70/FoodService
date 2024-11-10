@@ -7,7 +7,9 @@ import org.springframework.stereotype.Component
 import ru.fintech.food.service.configuration.AuthenticationProperties
 import ru.fintech.food.service.user.entity.User
 import ru.fintech.food.service.user.repository.RedisTokenRepository
-import java.util.*
+import java.util.Base64
+import java.util.Date
+import java.util.UUID
 
 @Component
 class JwtTokenUtils(

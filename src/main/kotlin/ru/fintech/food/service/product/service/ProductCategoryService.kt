@@ -1,6 +1,6 @@
 package ru.fintech.food.service.product.service
 
-import java.util.UUID
+import jakarta.transaction.Transactional
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import ru.fintech.food.service.common.dto.Response
@@ -12,6 +12,7 @@ import ru.fintech.food.service.product.mapper.ProductCategoryMapper
 import ru.fintech.food.service.product.repository.ProductCategoryRepository
 import ru.fintech.food.service.product.repository.RedisProductCategoryRepository
 import ru.fintech.food.service.user.dto.user.UserDto
+import java.util.UUID
 
 interface ProductCategoryService {
     fun getCategories(): List<ProductCategoryDto>
@@ -42,7 +43,7 @@ class ProductCategoryServiceImpl(
         }
 
         val categories = productCategoryRepository.findAll()
-            .map(ProductCategoryMapper::toProductCategoryDto)
+            .map(ProductCategoryMapper::ProductCategoryDto)
 
         log.info("Возвращаем {} категорий из бд", categories.size)
         categories.forEach {
@@ -53,25 +54,27 @@ class ProductCategoryServiceImpl(
     }
 
     override fun getCategoryById(categoryId: UUID): ProductCategoryDto =
-        ProductCategoryMapper.toProductCategoryDto(
+        ProductCategoryMapper.ProductCategoryDto(
             productCategoryRepository.findById(categoryId)
                 .orElseThrow { ProductCategoryNotFoundException(categoryId) }
         )
 
+    @Transactional
     override fun createCategory(userDto: UserDto, categoryRequestDto: ProductCategoryRequestDto): ProductCategoryDto {
         productCategoryRepository.findByName(categoryRequestDto.name)
             .ifPresent { throw ProductCategoryAlreadyExistsException(categoryRequestDto.name) }
 
-        val category = ProductCategoryMapper.toEntity(categoryRequestDto)
+        val category = ProductCategoryMapper.ProductCategory(categoryRequestDto)
 
         productCategoryRepository.save(category)
 
-        val dto = ProductCategoryMapper.toProductCategoryDto(category)
+        val dto = ProductCategoryMapper.ProductCategoryDto(category)
         redisProductCategoryRepository.saveCategory(category.id.toString(), dto)
 
         return dto
     }
 
+    @Transactional
     override fun updateCategory(
         userDto: UserDto,
         categoryId: UUID,
@@ -87,12 +90,13 @@ class ProductCategoryServiceImpl(
 
         productCategoryRepository.save(category)
 
-        val dto = ProductCategoryMapper.toProductCategoryDto(category)
+        val dto = ProductCategoryMapper.ProductCategoryDto(category)
         redisProductCategoryRepository.saveCategory(categoryId.toString(), dto)
 
         return dto
     }
 
+    @Transactional
     override fun deleteCategory(userDto: UserDto, categoryId: UUID): Response {
         val category = productCategoryRepository.findById(categoryId)
             .orElseThrow { ProductCategoryNotFoundException(categoryId) }

@@ -9,15 +9,15 @@ import java.time.format.DateTimeFormatter
 
 @Schema(description = "Ответ на запросы")
 class ErrorResponse(
-    @Schema(description = "Статус ответа", example = "200")
+    @field:Schema(description = "Статус ответа", example = "200")
     @field:JsonProperty("status")
     private val status: Int,
 
-    @Schema(description = "Сообщение ответа", example = "Категория успешно удалена")
+    @field:Schema(description = "Сообщение ответа", example = "Категория успешно удалена")
     @field:JsonProperty("message")
     private val message: String,
 
-    @Schema(description = "Время ответа", example = "2024-11-09T07:13:57.615242600Z")
+    @field:Schema(description = "Время ответа", example = "2024-11-09T07:13:57.615242600Z")
     @field:JsonProperty("timestamp")
     private val timestamp: String = DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
 

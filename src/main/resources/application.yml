@@ -1,4 +1,9 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 2MB
+      max-request-size: 2MB
+      enabled: true
   datasource:
     url: jdbc:postgresql://localhost:5432/food
     username: postgres
@@ -35,3 +40,13 @@ mail:
   host: host
   port: 123
   url-to-where: http://localhost:8080
+
+minio:
+  access-key: minioadmin
+  secret-key: minioadmin
+  endpoint: http://localhost:9000
+  bucket-name: image
+  available-extensions:
+    - png
+    - jpg
+

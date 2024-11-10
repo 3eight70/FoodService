@@ -8,7 +8,7 @@ import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import org.jetbrains.annotations.NotNull
 import java.time.Instant
-import java.util.*
+import java.util.UUID
 
 /**
  * Сущность для рефреш токена

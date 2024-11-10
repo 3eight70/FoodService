@@ -8,7 +8,7 @@ import java.util.UUID
 import kotlin.reflect.KClass
 
 @MustBeDocumented
-@Constraint(validatedBy = [UuidValidator::class])
+@Constraint(validatedBy = [SetStringUuidValidator::class])
 @Target(AnnotationTarget.FIELD, AnnotationTarget.VALUE_PARAMETER)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class ValidUUID(
@@ -17,7 +17,7 @@ annotation class ValidUUID(
     val payload: Array<KClass<out Payload>> = []
 )
 
-class UuidValidator : ConstraintValidator<ValidUUID, Set<String>> {
+class SetStringUuidValidator : ConstraintValidator<ValidUUID, Set<String>> {
     override fun isValid(value: Set<String>?, context: ConstraintValidatorContext?): Boolean {
         if (value.isNullOrEmpty()) {
             return false

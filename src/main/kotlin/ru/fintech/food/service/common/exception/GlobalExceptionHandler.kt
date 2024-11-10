@@ -1,15 +1,13 @@
 package ru.fintech.food.service.common.exception
 
 import io.jsonwebtoken.security.SignatureException
+import io.minio.errors.MinioException
 import jakarta.validation.ConstraintViolationException
-import java.time.Instant
-import java.time.format.DateTimeFormatter
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.security.authentication.DisabledException
-import org.springframework.validation.FieldError
 import org.springframework.web.HttpMediaTypeNotAcceptableException
 import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.MissingRequestHeaderException
@@ -119,6 +117,20 @@ class GlobalExceptionHandler {
         )
     }
 
+    @ExceptionHandler(MinioException::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleMinioException(e: MinioException): ResponseEntity<Response> {
+        log.error("При загрузке файла в minio что-то пошло не так", e)
+
+        return ResponseEntity(
+            Response(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                e.message,
+            ),
+            HttpStatus.INTERNAL_SERVER_ERROR
+        )
+    }
+
     @ExceptionHandler(MissingServletRequestPartException::class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     fun handleMissingServletRequestPartException(e: MissingServletRequestPartException): ResponseEntity<Response> {
@@ -155,7 +167,7 @@ class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception::class)
     fun handle(e: Exception): ResponseEntity<Response> {
-        log.error("Произошла неизвестная ошибка", e)
+        log.error("Произошла неожиданная ошибка", e)
 
         return ResponseEntity(
             Response(

@@ -10,7 +10,7 @@ import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import ru.fintech.food.service.user.dto.user.RoleEnum
-import java.util.*
+import java.util.UUID
 
 /**
  * Сущность пользователя

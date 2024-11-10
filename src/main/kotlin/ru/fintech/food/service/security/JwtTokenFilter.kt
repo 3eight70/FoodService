@@ -42,7 +42,7 @@ class JwtTokenFilter(
                 if (tokenInRedis) {
                     val email = jwtTokenUtils.getUserEmail(jwtToken)
 
-                    val userDto = UserMapper.toUserDto(
+                    val userDto = UserMapper.UserDto(
                         userRepository.findUserByEmail(email)
                             .orElseThrow { UsernameNotFoundException("Пользователя с почтой: $email не существует") }
                     )
