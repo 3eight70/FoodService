@@ -1,5 +1,8 @@
 package ru.fintech.food.service.user.service
 
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.Executors
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -23,15 +26,14 @@ import ru.fintech.food.service.user.mapper.UserMapper
 import ru.fintech.food.service.user.repository.RefreshTokenRepository
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
-import java.util.UUID
 
 interface UserService {
     fun loadUserByUsername(username: String?): UserDetails
-    fun verifyUser(userId: UUID, code: String): Response
+    fun verifyUser(userId: UUID, code: String): CompletableFuture<Response>
     fun validateToken(token: String): Boolean
-    fun registerUser(registerModel: UserRegistrationModel): Response
-    fun loginUser(loginCredentials: LoginCredentials, refreshToken: RefreshToken): TokenResponse
-    fun logoutUser(token: String): Response
+    fun registerUser(registerModel: UserRegistrationModel): CompletableFuture<Response>
+    fun loginUser(loginCredentials: LoginCredentials, refreshToken: RefreshToken): CompletableFuture<TokenResponse>
+    fun logoutUser(token: String): CompletableFuture<Response>
 }
 
 @Service
@@ -44,94 +46,111 @@ class UserServiceImpl(
     private val mailProperties: MailProperties
 ) : UserService, UserDetailsService {
     @Transactional
-    override fun verifyUser(userId: UUID, code: String): Response {
-        val user = userRepository.findById(userId)
-            .orElseThrow { UsernameNotFoundException("Пользователь с id: $userId не найден") }
+    override fun verifyUser(userId: UUID, code: String): CompletableFuture<Response> =
+        userRepository.findUserById(userId)
+            .thenApply { user ->
+                if (user == null) {
+                    throw UsernameNotFoundException("Пользователь с id: $userId не найден")
+                }
 
-        if (user.verificationCode != code)
-            throw BadRequestException("Неверно указанный код подтверждения аккаунта")
+                if (user.verificationCode != code)
+                    throw BadRequestException("Неверно указанный код подтверждения аккаунта")
 
-        user.isConfirmed = true
-        user.verificationCode = null
+                user.isConfirmed = true
+                user.verificationCode = null
 
-        userRepository.save(user)
+                userRepository.save(user)
 
-        return Response(
-            status = 200,
-            message = "Аккаунт успешно подтвержден",
-        )
-    }
+                Response(
+                    status = 200,
+                    message = "Аккаунт успешно подтвержден",
+                )
+            }
+
 
     override fun validateToken(token: String): Boolean = jwtTokenUtils.validateToken(token)
 
     @Transactional
-    override fun registerUser(registerModel: UserRegistrationModel): Response {
-        if (userRepository.existsByEmail(registerModel.email))
-            throw UserAlreadyExistsException("Пользователь с указанной почтой уже существует")
-        else if (userRepository.existsByPhoneNumber(registerModel.phoneNumber))
-            throw UserAlreadyExistsException("Пользователь с указанным номером телефона уже существует")
+    override fun registerUser(registerModel: UserRegistrationModel): CompletableFuture<Response> =
+        CompletableFuture.supplyAsync {
+            if (userRepository.existsByEmail(registerModel.email))
+                throw UserAlreadyExistsException("Пользователь с указанной почтой уже существует")
+            else if (userRepository.existsByPhoneNumber(registerModel.phoneNumber))
+                throw UserAlreadyExistsException("Пользователь с указанным номером телефона уже существует")
 
-        val user = User(
-            email = registerModel.email,
-            phoneNumber = registerModel.phoneNumber,
-            verificationCode = UUID.randomUUID().toString(),
-            password = passwordEncoder.encode(registerModel.password),
-            role = RoleEnum.USER
-        )
+            val user = User(
+                email = registerModel.email,
+                phoneNumber = registerModel.phoneNumber,
+                verificationCode = UUID.randomUUID().toString(),
+                password = passwordEncoder.encode(registerModel.password),
+                role = RoleEnum.USER
+            )
 
-        userRepository.saveAndFlush(user)
+            userRepository.saveAndFlush(user)
 
-        //TODO: Убрать, когда будет настроена почта и добавить асинхронщину
-        if (mailProperties.enabled) {
-            senderService.proxyMessage(UserMapper.UserDto(user), user.verificationCode!!)
-        } else {
-            println(user.verificationCode)
+            //TODO: Убрать, когда будет настроена почта и добавить асинхронщину
+            if (mailProperties.enabled) {
+                senderService.proxyMessage(UserMapper.UserDto(user), user.verificationCode!!)
+            } else {
+                println(user.verificationCode)
+            }
+
+            return@supplyAsync Response(
+                status = HttpStatus.OK.value(),
+                message = "Теперь подтвердите аккаунт"
+            )
         }
-
-        return Response(
-            status = HttpStatus.OK.value(),
-            message = "Теперь подтвердите аккаунт"
-        )
-    }
 
     @Transactional
-    override fun loginUser(loginCredentials: LoginCredentials, refreshToken: RefreshToken): TokenResponse {
-        val user = userRepository.findUserByEmail(loginCredentials.email)
-            .orElseThrow { UsernameNotFoundException("Пользователь с почтой: ${loginCredentials.email} не был найден") }
+    override fun loginUser(
+        loginCredentials: LoginCredentials,
+        refreshToken: RefreshToken
+    ): CompletableFuture<TokenResponse> =
+        userRepository.findUserByEmail(loginCredentials.email)
+            .thenApply { user ->
+                user
+                    ?: throw UsernameNotFoundException("Пользователь с почтой: ${loginCredentials.email} не был найден")
+            }.thenCompose { user ->
+                if (!user.isConfirmed) {
+                    throw AccountNotConfirmedException()
+                }
 
-        if (!user.isConfirmed) {
-            throw AccountNotConfirmedException()
-        }
+                val token = jwtTokenUtils.generateToken(user)
 
-        val token = jwtTokenUtils.generateToken(user)
+                jwtTokenUtils.saveToken(jwtTokenUtils.getIdFromToken(token))
 
-        jwtTokenUtils.saveToken(jwtTokenUtils.getIdFromToken(token))
-
-        return TokenResponse(token, refreshToken.token)
-    }
+                CompletableFuture.completedFuture(TokenResponse(token, refreshToken.token))
+            }
 
     @Transactional
-    override fun logoutUser(token: String): Response {
-        val jwtToken = token.removePrefix("Bearer ").trim()
-        val tokenId = jwtTokenUtils.getIdFromToken(jwtToken)
-        val userId = jwtTokenUtils.getUserId(jwtToken)
+    override fun logoutUser(token: String): CompletableFuture<Response> =
+        CompletableFuture.supplyAsync {
+            val jwtToken = token.removePrefix("Bearer ").trim()
+            val tokenId = jwtTokenUtils.getIdFromToken(jwtToken)
+            val userId = jwtTokenUtils.getUserId(jwtToken)
 
-        val refreshToken = refreshTokenRepository.findByUserId(UUID.fromString(userId))
+            refreshTokenRepository.findByUserId(UUID.fromString(userId)).thenCompose { token ->
+                if (token != null) {
+                    refreshTokenRepository.delete(token)
+                }
 
-        refreshToken.ifPresent { value ->
-            refreshTokenRepository.delete(value)
+                jwtTokenUtils.deleteTokenById(tokenId)
+
+                CompletableFuture.completedFuture(
+                    Response(
+                        status = HttpStatus.OK.value(),
+                        message = "Пользователь успешно вышел с аккаунта"
+                    )
+                )
+            }
         }
-
-        jwtTokenUtils.deleteTokenById(tokenId)
-
-        return Response(
-            status = HttpStatus.OK.value(),
-            message = "Пользователь успешно вышел с аккаунта",
-        )
-    }
+            .thenCompose { it }
 
     override fun loadUserByUsername(username: String?): UserDetails =
         userRepository.findUserByEmail(username!!)
-            .orElseThrow { UsernameNotFoundException("Пользователь с почтой: $username не был найден") }
-
+            .thenApply { user ->
+                user
+                    ?: throw UsernameNotFoundException("Пользователь с почтой: $username не был найден")
+            }
+            .join()
 }

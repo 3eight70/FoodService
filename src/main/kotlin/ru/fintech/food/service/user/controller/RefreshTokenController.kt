@@ -2,6 +2,7 @@ package ru.fintech.food.service.user.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import java.util.concurrent.CompletableFuture
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -22,6 +23,6 @@ class RefreshTokenController(
         summary = "Обновление access токена",
         description = "Позволяет пользователю обновить access токен при помощи refresh токена"
     )
-    fun refreshToken(@RequestBody refreshTokenDto: RefreshTokenDto): ResponseEntity<TokenResponse> =
+    fun refreshToken(@RequestBody refreshTokenDto: RefreshTokenDto): CompletableFuture<ResponseEntity<TokenResponse>> =
         refreshTokenService.refreshJwtToken(refreshTokenDto)
 }

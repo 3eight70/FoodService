@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
@@ -21,7 +23,6 @@ import ru.fintech.food.service.user.dto.user.LoginCredentials
 import ru.fintech.food.service.user.dto.user.UserRegistrationModel
 import ru.fintech.food.service.user.service.RefreshTokenService
 import ru.fintech.food.service.user.service.UserService
-import java.util.UUID
 
 @RestController
 @Tag(name = "Пользователь", description = "Отвечает за работу с пользователями")
@@ -37,7 +38,7 @@ class UserController(
         description = "Позволяет пользователю залогониться"
     )
     @PostMapping("/login")
-    fun loginUser(@Valid @RequestBody loginCredentials: LoginCredentials): ResponseEntity<TokenResponse> {
+    fun loginUser(@Valid @RequestBody loginCredentials: LoginCredentials): CompletableFuture<ResponseEntity<TokenResponse>> {
         val authentication = authenticationManager.authenticate(
             UsernamePasswordAuthenticationToken(
                 loginCredentials.email,
@@ -46,12 +47,14 @@ class UserController(
         )
 
         if (authentication.isAuthenticated) {
-            val refreshToken = refreshTokenService.checkRefreshToken(loginCredentials)
-
-            return ResponseEntity.ok(userService.loginUser(loginCredentials, refreshToken))
+            return refreshTokenService.checkRefreshToken(loginCredentials)
+                .thenCompose { token ->
+                    userService.loginUser(loginCredentials, token)
+                }
+                .thenApply { ResponseEntity.ok(it) }
         }
 
-        return ResponseEntity(HttpStatus.UNAUTHORIZED)
+        return CompletableFuture.completedFuture(ResponseEntity(HttpStatus.UNAUTHORIZED))
     }
 
     @Operation(
@@ -59,8 +62,9 @@ class UserController(
         description = "Позволяет пользователю зарегистрироваться"
     )
     @PostMapping("/register")
-    fun registerUser(@Valid @RequestBody registerModel: UserRegistrationModel): ResponseEntity<Response> {
-        return ResponseEntity.ok(userService.registerUser(registerModel))
+    fun registerUser(@Valid @RequestBody registerModel: UserRegistrationModel): CompletableFuture<ResponseEntity<Response>> {
+        return userService.registerUser(registerModel)
+            .thenApply { ResponseEntity.ok(it) }
     }
 
     @Operation(
@@ -86,6 +90,10 @@ class UserController(
         description = "Позволяет пользователю обнулить текущую сессию"
     )
     @PostMapping("/logout")
-    fun logoutUser(@RequestHeader(value = "Authorization") token: String) =
-        ResponseEntity.ok(userService.logoutUser(token))
+    fun logoutUser(
+        @Parameter(description = "Bearer JWT token")
+        @RequestHeader(value = "Authorization", required = true) token: String
+    ): CompletableFuture<ResponseEntity<Response>> =
+        userService.logoutUser(token)
+            .thenApply { ResponseEntity.ok(it) }
 }

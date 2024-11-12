@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import java.util.UUID
+import java.util.concurrent.CompletableFuture
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
@@ -16,10 +18,11 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import ru.fintech.food.service.common.dto.Response
+import ru.fintech.food.service.product.dto.category.ProductCategoryDto
 import ru.fintech.food.service.product.dto.category.ProductCategoryRequestDto
 import ru.fintech.food.service.product.service.ProductCategoryService
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 @RestController
 @Tag(name = "Категории продуктов", description = "Позволяет работать с категориями продуктов")
@@ -32,7 +35,9 @@ class ProductCategoryController(
         summary = "Получение всех категорий продуктов",
         description = "Позволяет получить все категории продуктов"
     )
-    fun getCategories() = ResponseEntity.ok(productCategoryService.getCategories())
+    fun getCategories(): CompletableFuture<ResponseEntity<List<ProductCategoryDto>>> =
+        productCategoryService.getCategories()
+            .thenApply { ResponseEntity.ok(it) }
 
     @GetMapping("/{categoryId}")
     @Operation(
@@ -41,7 +46,9 @@ class ProductCategoryController(
     )
     fun getCategory(
         @Parameter(description = "Идентификатор категории") @PathVariable(name = "categoryId") categoryId: UUID
-    ) = ResponseEntity.ok(productCategoryService.getCategoryById(categoryId))
+    ): CompletableFuture<ResponseEntity<ProductCategoryDto>> =
+        productCategoryService.getCategoryById(categoryId)
+            .thenApply { ResponseEntity.ok(it) }
 
     @DeleteMapping
     @Operation(
@@ -52,7 +59,9 @@ class ProductCategoryController(
     fun deleteCategory(
         @AuthenticationPrincipal userDto: UserDto,
         @Parameter(description = "Идентификатор категории") @RequestParam(name = "categoryId") categoryId: UUID
-    ) = ResponseEntity.ok(productCategoryService.deleteCategory(userDto, categoryId))
+    ): CompletableFuture<ResponseEntity<Response>> =
+        productCategoryService.deleteCategory(userDto, categoryId)
+            .thenApply { ResponseEntity.ok(it) }
 
     @PostMapping
     @Operation(
@@ -63,7 +72,9 @@ class ProductCategoryController(
     fun createCategory(
         @AuthenticationPrincipal userDto: UserDto,
         @Validated @RequestBody categoryRequestDto: ProductCategoryRequestDto
-    ) = ResponseEntity.ok(productCategoryService.createCategory(userDto, categoryRequestDto))
+    ): CompletableFuture<ResponseEntity<ProductCategoryDto>> =
+        productCategoryService.createCategory(userDto, categoryRequestDto)
+            .thenApply { ResponseEntity.ok(it) }
 
     @PutMapping
     @Operation(
@@ -75,6 +86,7 @@ class ProductCategoryController(
         @AuthenticationPrincipal userDto: UserDto,
         @Parameter(description = "Идентификатор категории для изменения") @RequestParam(name = "categoryId") categoryId: UUID,
         @Validated @RequestBody categoryRequestDto: ProductCategoryRequestDto
-    ) =
-        ResponseEntity.ok(productCategoryService.updateCategory(userDto, categoryId, categoryRequestDto))
+    ): CompletableFuture<ResponseEntity<ProductCategoryDto>> =
+        productCategoryService.updateCategory(userDto, categoryId, categoryRequestDto)
+            .thenApply { ResponseEntity.ok(it) }
 }

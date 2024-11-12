@@ -42,19 +42,23 @@ class JwtTokenFilter(
                 if (tokenInRedis) {
                     val email = jwtTokenUtils.getUserEmail(jwtToken)
 
-                    val userDto = UserMapper.UserDto(
-                        userRepository.findUserByEmail(email)
-                            .orElseThrow { UsernameNotFoundException("Пользователя с почтой: $email не существует") }
-                    )
+                    userRepository.findUserByEmail(email)
+                        .thenAccept { user ->
+                            if (user != null) {
+                                val userDto = UserMapper.UserDto(user)
 
-                    if (SecurityContextHolder.getContext().authentication == null && userDto.isConfirmed) {
-                        val token = UsernamePasswordAuthenticationToken(
-                            userDto,
-                            jwtToken,
-                            mutableListOf(SimpleGrantedAuthority("ROLE_${userDto.role}"))
-                        )
-                        SecurityContextHolder.getContext().authentication = token
-                    }
+                                if (SecurityContextHolder.getContext().authentication == null && userDto.isConfirmed) {
+                                    val token = UsernamePasswordAuthenticationToken(
+                                        userDto,
+                                        jwtToken,
+                                        mutableListOf(SimpleGrantedAuthority("ROLE_${userDto.role}"))
+                                    )
+                                    SecurityContextHolder.getContext().authentication = token
+                                }
+                            } else {
+                                throw UsernameNotFoundException("Пользователя с почтой: $email не существует")
+                            }
+                        }
                 }
             }
         } catch (e: Exception) {

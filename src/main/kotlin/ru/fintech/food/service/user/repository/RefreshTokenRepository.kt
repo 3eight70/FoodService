@@ -6,10 +6,11 @@ import ru.fintech.food.service.user.entity.RefreshToken
 import ru.fintech.food.service.user.entity.User
 import java.util.Optional
 import java.util.UUID
+import java.util.concurrent.CompletableFuture
 
 @Repository
 interface RefreshTokenRepository : JpaRepository<RefreshToken, UUID> {
-    fun findByUser(user: User): Optional<RefreshToken>
-    fun findByToken(token: String): Optional<RefreshToken>
-    fun findByUserId(userId: UUID): Optional<RefreshToken>
+    fun findByUser(user: User): CompletableFuture<RefreshToken>
+    fun findByToken(token: String): CompletableFuture<RefreshToken>
+    fun findByUserId(userId: UUID): CompletableFuture<RefreshToken>
 }

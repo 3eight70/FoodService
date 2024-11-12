@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.DisabledException
 import org.springframework.web.HttpMediaTypeNotAcceptableException
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -89,6 +90,18 @@ class GlobalExceptionHandler {
             Response(
                 HttpStatus.UNAUTHORIZED.value(),
                 "Неверная подпись токена авторизации",
+            ), HttpStatus.UNAUTHORIZED
+        )
+    }
+
+    @ExceptionHandler(BadCredentialsException::class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    fun handleBadCredentialsException(e: BadCredentialsException): ResponseEntity<Response> {
+        log.error(e.message, e)
+        return ResponseEntity(
+            Response(
+                HttpStatus.UNAUTHORIZED.value(),
+                "Неверный логин или пароль",
             ), HttpStatus.UNAUTHORIZED
         )
     }
