@@ -3,13 +3,13 @@ package ru.fintech.food.service.utils
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import java.util.Base64
+import java.util.Date
+import java.util.UUID
 import org.springframework.stereotype.Component
 import ru.fintech.food.service.configuration.AuthenticationProperties
 import ru.fintech.food.service.user.entity.User
 import ru.fintech.food.service.user.repository.RedisTokenRepository
-import java.util.Base64
-import java.util.Date
-import java.util.UUID
 
 @Component
 class JwtTokenUtils(

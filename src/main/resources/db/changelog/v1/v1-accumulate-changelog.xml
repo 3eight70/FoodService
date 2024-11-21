@@ -4,5 +4,5 @@
    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <include file="v1-create-tables-changelog.xml" relativeToChangelogFile="true"/>
-
+    <include file="v1-create-restaurant-tables-changelog.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

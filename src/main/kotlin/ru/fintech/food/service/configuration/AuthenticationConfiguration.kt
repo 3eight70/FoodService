@@ -1,9 +1,9 @@
 package ru.fintech.food.service.configuration
 
+import java.time.Duration
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
-import java.time.Duration
 
 @Configuration
 @EnableConfigurationProperties(AuthenticationProperties::class)

@@ -6,9 +6,9 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
-import org.jetbrains.annotations.NotNull
 import java.time.Instant
 import java.util.UUID
+import org.jetbrains.annotations.NotNull
 
 /**
  * Сущность для рефреш токена

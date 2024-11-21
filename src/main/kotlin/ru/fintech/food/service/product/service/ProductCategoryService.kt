@@ -1,6 +1,7 @@
 package ru.fintech.food.service.product.service
 
 import jakarta.transaction.Transactional
+import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import ru.fintech.food.service.common.dto.Response
@@ -12,7 +13,6 @@ import ru.fintech.food.service.product.mapper.ProductCategoryMapper
 import ru.fintech.food.service.product.repository.ProductCategoryRepository
 import ru.fintech.food.service.product.repository.RedisProductCategoryRepository
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 interface ProductCategoryService {
     fun getCategories(): List<ProductCategoryDto>

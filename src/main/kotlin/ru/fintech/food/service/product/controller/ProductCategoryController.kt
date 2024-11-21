@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import java.util.UUID
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
@@ -16,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import ru.fintech.food.service.common.SwaggerConfig.Companion.BEARER_AUTH
 import ru.fintech.food.service.product.dto.category.ProductCategoryRequestDto
 import ru.fintech.food.service.product.service.ProductCategoryService
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 @RestController
 @Tag(name = "Категории продуктов", description = "Позволяет работать с категориями продуктов")
@@ -47,7 +48,7 @@ class ProductCategoryController(
     @Operation(
         summary = "Удаление категории",
         description = "Позволяет удалить категорию",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     fun deleteCategory(
         @AuthenticationPrincipal userDto: UserDto,
@@ -58,7 +59,7 @@ class ProductCategoryController(
     @Operation(
         summary = "Создание категории",
         description = "Позволяет создать категорию",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     fun createCategory(
         @AuthenticationPrincipal userDto: UserDto,
@@ -69,7 +70,7 @@ class ProductCategoryController(
     @Operation(
         summary = "Обновление категории",
         description = "Позволяет обновить категорию",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     fun updateCategory(
         @AuthenticationPrincipal userDto: UserDto,

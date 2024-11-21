@@ -2,9 +2,9 @@ package ru.fintech.food.service.product.dto.product
 
 import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
-import ru.fintech.food.service.product.dto.category.ProductCategoryDto
 import java.math.BigDecimal
 import java.util.UUID
+import ru.fintech.food.service.product.dto.category.ProductCategoryDto
 
 @Schema(description = "dto для позиций меню")
 class FullProductDto(

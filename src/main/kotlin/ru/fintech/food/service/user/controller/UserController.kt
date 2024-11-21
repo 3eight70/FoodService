@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
@@ -21,7 +22,6 @@ import ru.fintech.food.service.user.dto.user.LoginCredentials
 import ru.fintech.food.service.user.dto.user.UserRegistrationModel
 import ru.fintech.food.service.user.service.RefreshTokenService
 import ru.fintech.food.service.user.service.UserService
-import java.util.UUID
 
 @RestController
 @Tag(name = "Пользователь", description = "Отвечает за работу с пользователями")

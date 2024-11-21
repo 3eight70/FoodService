@@ -4,9 +4,9 @@ import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Size
-import ru.fintech.food.service.utils.validation.ValidUUID
 import java.math.BigDecimal
 import java.util.UUID
+import ru.fintech.food.service.utils.validation.ValidUUID
 
 @Schema(description = "dto для создания/изменения позиции")
 class ProductRequestDto (

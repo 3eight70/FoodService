@@ -1,0 +1,91 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="v1-6" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_restaurants"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_restaurants">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="address" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="v1-7" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_holidays"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_holidays">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="restaurant_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="holiday_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="t_holidays"
+                baseColumnNames="restaurant_id"
+                referencedTableName="t_restaurants"
+                referencedColumnNames="id"
+                constraintName="fk_holidays_restaurant"/>
+    </changeSet>
+
+    <changeSet id="v1-8" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_working_hours"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_working_hours">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="restaurant_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="day_of_week" type="varchar(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="opening_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="closing_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="t_working_hours"
+                baseColumnNames="restaurant_id"
+                referencedTableName="t_restaurants"
+                referencedColumnNames="id"
+                constraintName="fk_working_hours_restaurant"/>
+    </changeSet>
+    <changeSet id="v1-9" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="t_holidays"/>
+        </preConditions>
+        <dropTable tableName="t_holidays"/>
+    </changeSet>
+</databaseChangeLog>

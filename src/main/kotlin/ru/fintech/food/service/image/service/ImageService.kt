@@ -7,6 +7,7 @@ import io.minio.MakeBucketArgs
 import io.minio.MinioClient
 import io.minio.PutObjectArgs
 import io.minio.RemoveObjectArgs
+import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.HttpHeaders
@@ -27,7 +28,6 @@ import ru.fintech.food.service.image.mapper.ImageMapper
 import ru.fintech.food.service.image.repository.ImageRepository
 import ru.fintech.food.service.product.repository.ProductRepository
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 interface ImageService {
     fun uploadImage(userDto: UserDto, file: MultipartFile): ImageDto

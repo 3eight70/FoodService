@@ -6,11 +6,11 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.Id
 import jakarta.persistence.Table
+import java.util.UUID
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.userdetails.UserDetails
 import ru.fintech.food.service.user.dto.user.RoleEnum
-import java.util.UUID
 
 /**
  * Сущность пользователя

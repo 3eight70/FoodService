@@ -1,5 +1,7 @@
 package ru.fintech.food.service.user.service
 
+import java.time.Instant
+import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -14,8 +16,6 @@ import ru.fintech.food.service.user.exception.ExpiredTokenException
 import ru.fintech.food.service.user.repository.RefreshTokenRepository
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
-import java.time.Instant
-import java.util.UUID
 
 interface RefreshTokenService {
     fun verifyExpiration(token: RefreshToken): RefreshToken?

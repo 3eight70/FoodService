@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import java.util.UUID
 import org.springframework.core.io.InputStreamResource
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -16,10 +17,10 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.multipart.MultipartFile
+import ru.fintech.food.service.common.SwaggerConfig.Companion.BEARER_AUTH
 import ru.fintech.food.service.image.dto.ImageDto
 import ru.fintech.food.service.image.service.ImageService
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 @RestController
 @RequestMapping("/v1/image")
@@ -39,7 +40,7 @@ class ImageController(
     @Operation(
         summary = "Загрузка изображения",
         description = "Позволяет сохранить изображение в хранилище",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     @PostMapping(consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     fun uploadImage(
@@ -50,7 +51,7 @@ class ImageController(
     @Operation(
         summary = "Удаление изображения",
         description = "Позволяет удлить изображение из хранилища",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     @DeleteMapping("/{id}")
     fun deleteImage(

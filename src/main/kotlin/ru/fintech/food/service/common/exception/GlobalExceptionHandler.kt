@@ -3,6 +3,7 @@ package ru.fintech.food.service.common.exception
 import io.jsonwebtoken.security.SignatureException
 import io.minio.errors.MinioException
 import jakarta.validation.ConstraintViolationException
+import java.time.format.DateTimeParseException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -67,6 +68,16 @@ class GlobalExceptionHandler {
         val errorResponse = Response(
             HttpStatus.BAD_REQUEST.value(),
             "Ошибка в теле запроса: ${e.localizedMessage}",
+        )
+
+        return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)
+    }
+
+    @ExceptionHandler(DateTimeParseException::class)
+    fun handleDateTimeParseException(e: DateTimeParseException): ResponseEntity<Response> {
+        val errorResponse = Response(
+            HttpStatus.BAD_REQUEST.value(),
+            "Время указано в неверном формате",
         )
 
         return ResponseEntity(errorResponse, HttpStatus.BAD_REQUEST)

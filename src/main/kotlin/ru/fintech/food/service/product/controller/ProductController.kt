@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import java.util.UUID
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -20,10 +21,10 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
+import ru.fintech.food.service.common.SwaggerConfig.Companion.BEARER_AUTH
 import ru.fintech.food.service.product.dto.product.ProductRequestDto
 import ru.fintech.food.service.product.service.ProductService
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 @RestController
 @RequestMapping("/v1/product")
@@ -70,7 +71,7 @@ class ProductController(
     @Operation(
         summary = "Создание позиции меню",
         description = "Позволяет создать позицию",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     fun createProduct(
         @AuthenticationPrincipal userDto: UserDto,
@@ -81,7 +82,7 @@ class ProductController(
     @Operation(
         summary = "Обновление позиции меню",
         description = "Позволяет обновить конкретную позицию",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     fun updateProduct(
         @AuthenticationPrincipal userDto: UserDto,
@@ -93,7 +94,7 @@ class ProductController(
     @Operation(
         summary = "Удаление позиции меню",
         description = "Позволяет удалить конкретную позицию",
-        security = [SecurityRequirement(name = "bearerAuth")]
+        security = [SecurityRequirement(name = BEARER_AUTH)]
     )
     fun deleteProduct(
         @AuthenticationPrincipal userDto: UserDto,
