@@ -40,7 +40,6 @@ class Product(
     /**
      * Идентификатор изображения
      */
-    //TODO: Реализовать S3 хранилище - minio и отдельную бд для хранения id изображения в minio
     @Column(name = "image_id", nullable = false)
     var imageId: UUID,
     /**

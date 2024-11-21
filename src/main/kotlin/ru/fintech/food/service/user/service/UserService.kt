@@ -1,5 +1,9 @@
 package ru.fintech.food.service.user.service
 
+import java.util.UUID
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.springframework.http.HttpStatus
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
@@ -23,7 +27,6 @@ import ru.fintech.food.service.user.mapper.UserMapper
 import ru.fintech.food.service.user.repository.RefreshTokenRepository
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
-import java.util.UUID
 
 interface UserService {
     fun loadUserByUsername(username: String?): UserDetails
@@ -64,6 +67,7 @@ class UserServiceImpl(
 
     override fun validateToken(token: String): Boolean = jwtTokenUtils.validateToken(token)
 
+    @OptIn(DelicateCoroutinesApi::class)
     @Transactional
     override fun registerUser(registerModel: UserRegistrationModel): Response {
         if (userRepository.existsByEmail(registerModel.email))
@@ -83,7 +87,9 @@ class UserServiceImpl(
 
         //TODO: Убрать, когда будет настроена почта и добавить асинхронщину
         if (mailProperties.enabled) {
-            senderService.proxyMessage(UserMapper.UserDto(user), user.verificationCode!!)
+            GlobalScope.launch {
+                senderService.proxyMessage(UserMapper.UserDto(user), user.verificationCode!!)
+            }
         } else {
             println(user.verificationCode)
         }

@@ -1,0 +1,156 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="v1-1" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_users"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_users">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="phone_number" type="varchar(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="verification_code" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="is_confirmed" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="varchar(50)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="v1-2" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_refresh_tokens"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_refresh_tokens">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="token" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="expiry_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <addForeignKeyConstraint
+                baseTableName="t_refresh_tokens"
+                baseColumnNames="user_id"
+                referencedTableName="t_users"
+                referencedColumnNames="id"
+                constraintName="fk_refresh_token_user"/>
+    </changeSet>
+
+    <changeSet id="v1-3" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_categories"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_categories">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="v1-4" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_products"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_products">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="text">
+                <constraints nullable="false"/>
+            </column>
+            <column name="price" type="decimal(19, 4)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="image_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="available" type="boolean">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <createTable tableName="t_product_categories">
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="category_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="t_product_categories"
+                baseColumnNames="product_id"
+                referencedTableName="t_products"
+                referencedColumnNames="id"
+                constraintName="fk_product_category_product"/>
+
+        <addForeignKeyConstraint
+                baseTableName="t_product_categories"
+                baseColumnNames="category_id"
+                referencedTableName="t_categories"
+                referencedColumnNames="id"
+                constraintName="fk_product_category_category"/>
+    </changeSet>
+
+    <changeSet id="v1-5" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_images"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_images">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="upload_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="image_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="size" type="bigint">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+</databaseChangeLog>

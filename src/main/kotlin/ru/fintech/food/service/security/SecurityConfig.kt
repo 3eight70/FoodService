@@ -82,7 +82,7 @@ class SecurityConfig(
             response.contentType = "application/json"
             response.characterEncoding = "UTF-8"
             response.status = HttpStatus.FORBIDDEN.value()
-            response.writer.write("{\"status\": \"403\", \"message\": \"У вас нет прав доступа\", \"timestamp\": \"${Instant.now()}\"}")
+            response.writer.write("{\"status\": 403, \"message\": \"У вас нет прав доступа\", \"timestamp\": \"${Instant.now()}\"}")
             response.writer.flush()
         }
     }

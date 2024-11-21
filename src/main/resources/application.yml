@@ -1,4 +1,7 @@
 spring:
+  liquibase:
+    enabled: true
+    change-log: db/changelog/main-changelog.xml
   servlet:
     multipart:
       max-file-size: 2MB
@@ -12,7 +15,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
   data:
     redis:
@@ -49,4 +52,3 @@ minio:
   available-extensions:
     - png
     - jpg
-

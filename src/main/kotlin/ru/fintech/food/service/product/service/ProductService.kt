@@ -1,6 +1,7 @@
 package ru.fintech.food.service.product.service
 
 import jakarta.transaction.Transactional
+import java.util.UUID
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageImpl
@@ -21,7 +22,6 @@ import ru.fintech.food.service.product.repository.ProductCategoryRepository
 import ru.fintech.food.service.product.repository.ProductRepository
 import ru.fintech.food.service.product.repository.RedisProductRepository
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 interface ProductService {
     fun getProducts(pageable: Pageable): Page<ShortProductDto>
@@ -132,7 +132,9 @@ class ProductServiceImpl(
         }
 
         val product = ProductMapper.Product(productDto)
+        val categories = productCategoryRepository.findAllById(productDto.categoryIds.map { UUID.fromString(it) })
 
+        product.categories = categories.toSet()
         productRepository.save(product)
 
         val createdProductDto = ProductMapper.FullProductDto(product)
