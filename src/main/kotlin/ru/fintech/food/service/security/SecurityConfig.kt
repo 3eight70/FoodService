@@ -1,6 +1,5 @@
 package ru.fintech.food.service.security
 
-import java.time.Instant
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -19,6 +18,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import org.springframework.web.filter.CorsFilter
 import ru.fintech.food.service.user.repository.UserRepository
 import ru.fintech.food.service.utils.JwtTokenUtils
+import java.time.Instant
 
 @EnableWebSecurity
 @Configuration
@@ -50,6 +50,9 @@ class SecurityConfig(
 
                     .requestMatchers(HttpMethod.POST, "/v1/image").hasRole("ADMIN")
                     .requestMatchers(HttpMethod.DELETE, "/v1/image").hasRole("ADMIN")
+
+                    .requestMatchers("/v1/bucket/**").authenticated()
+                    .requestMatchers("/v1/bucket").authenticated()
                     .anyRequest().permitAll()
             }
             .exceptionHandling { exception ->
