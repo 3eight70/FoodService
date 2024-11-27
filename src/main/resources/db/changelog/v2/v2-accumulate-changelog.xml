@@ -4,4 +4,5 @@
    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <include file="v2-create-bucket-changelog.xml" relativeToChangelogFile="true"/>
+    <include file="v2-create-order-changelog.xml" relativeToChangelogFile="true"/>
 </databaseChangeLog>

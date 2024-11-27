@@ -53,6 +53,12 @@ class SecurityConfig(
 
                     .requestMatchers("/v1/bucket/**").authenticated()
                     .requestMatchers("/v1/bucket").authenticated()
+
+                    .requestMatchers("/v1/order/**").authenticated()
+                    .requestMatchers("/v1/order").authenticated()
+
+                    .requestMatchers("/v1/admin/**").hasRole("ADMIN")
+                    .requestMatchers("/v1/admin").hasRole("ADMIN")
                     .anyRequest().permitAll()
             }
             .exceptionHandling { exception ->

@@ -1,0 +1,104 @@
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+    <changeSet id="v2-3" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_orders"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_orders">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="created_time" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="modified_time" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+            <column name="client_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="restaurant_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="courier_id" type="uuid">
+                <constraints nullable="true"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="delivery_address" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="payment_method" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="total_price" type="decimal">
+                <constraints nullable="false"/>
+            </column>
+            <column name="comments" type="varchar(255)">
+                <constraints nullable="true"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="t_orders"
+                baseColumnNames="client_id"
+                referencedTableName="t_users"
+                referencedColumnNames="id"
+                constraintName="fk_orders_client"/>
+
+        <addForeignKeyConstraint
+                baseTableName="t_orders"
+                baseColumnNames="restaurant_id"
+                referencedTableName="t_restaurants"
+                referencedColumnNames="id"
+                constraintName="fk_orders_restaurant"/>
+
+        <addForeignKeyConstraint
+                baseTableName="t_orders"
+                baseColumnNames="courier_id"
+                referencedTableName="t_users"
+                referencedColumnNames="id"
+                constraintName="fk_orders_courier"/>
+    </changeSet>
+
+    <changeSet id="v2-4" author="Vasilev Danil">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="t_order_products"/>
+            </not>
+        </preConditions>
+        <createTable tableName="t_order_products">
+            <column name="order_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="product_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addPrimaryKey columnNames="order_id, product_id" tableName="t_order_products" constraintName="pk_order_products"/>
+
+        <addForeignKeyConstraint
+                baseTableName="t_order_products"
+                baseColumnNames="order_id"
+                referencedTableName="t_orders"
+                referencedColumnNames="id"
+                constraintName="fk_order_products_order"/>
+
+        <addForeignKeyConstraint
+                baseTableName="t_order_products"
+                baseColumnNames="product_id"
+                referencedTableName="t_products"
+                referencedColumnNames="id"
+                constraintName="fk_order_products_product"/>
+    </changeSet>
+</databaseChangeLog>

@@ -53,7 +53,7 @@ class User(
      */
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
-    val role: RoleEnum
+    var role: RoleEnum
 ) : UserDetails {
     override fun getAuthorities(): MutableCollection<out GrantedAuthority> =
         mutableListOf(SimpleGrantedAuthority("ROLE_$role"))
