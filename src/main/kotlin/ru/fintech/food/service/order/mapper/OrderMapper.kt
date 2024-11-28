@@ -39,7 +39,7 @@ object OrderMapper {
             status = order.status,
         )
 
-    fun order(clientId: UUID, totalPrice: BigDecimal, orderedProducts: List<Product>, createOrderDto: CreateOrderDto) =
+    fun Order(clientId: UUID, totalPrice: BigDecimal, orderedProducts: List<Product>, createOrderDto: CreateOrderDto) =
         Order(
             modifiedTime = null,
             clientId = clientId,

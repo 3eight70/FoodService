@@ -83,20 +83,26 @@ class UserServiceImpl(
             role = RoleEnum.USER
         )
 
-        userRepository.saveAndFlush(user)
-
-        //TODO: Убрать, когда будет настроена почта и добавить асинхронщину
         if (mailProperties.enabled) {
+            userRepository.saveAndFlush(user)
+
             GlobalScope.launch {
                 senderService.proxyMessage(UserMapper.UserDto(user), user.verificationCode!!)
             }
+
+            return Response(
+                status = HttpStatus.OK.value(),
+                message = "Теперь подтвердите аккаунт"
+            )
         } else {
-            println(user.verificationCode)
+            user.verificationCode = null
+            user.isConfirmed = true
+            userRepository.save(user)
         }
 
         return Response(
             status = HttpStatus.OK.value(),
-            message = "Теперь подтвердите аккаунт"
+            message = "Аккаунт успешно зарегистрирован"
         )
     }
 

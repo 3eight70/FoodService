@@ -25,13 +25,13 @@ class Order(
     @Column(name = "created_time", nullable = false)
     val createdTime: Instant = Instant.now(),
     @Column(name = "modified_time")
-    val modifiedTime: Instant?,
+    var modifiedTime: Instant?,
     @Column(name = "client_id", nullable = false)
     val clientId: UUID,
     @Column(name = "restaurant_id", nullable = false)
     val restaurantId: UUID,
     @Column(name = "courier_id")
-    val courierId: UUID?,
+    var courierId: UUID?,
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status", nullable = false)
     var status: OrderStatusEnum,

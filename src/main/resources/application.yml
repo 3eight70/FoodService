@@ -52,3 +52,9 @@ minio:
   available-extensions:
     - png
     - jpg
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus

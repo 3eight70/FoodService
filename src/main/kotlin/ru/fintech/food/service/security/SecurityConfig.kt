@@ -26,6 +26,12 @@ class SecurityConfig(
     private val jwtTokenUtils: JwtTokenUtils,
     private val userRepository: UserRepository
 ) {
+    
+    companion object{
+        private const val ADMIN = "ADMIN"
+        private const val OPERATOR = "RESTAURANT_OPERATOR"
+        private const val COURIER = "COURIER"
+    }
 
     @Bean
     fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
@@ -33,23 +39,38 @@ class SecurityConfig(
             .cors { cors -> cors.disable() }
             .authorizeHttpRequests { requests ->
                 requests
-                    .requestMatchers(HttpMethod.POST, "/v1/restaurant/hours").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/v1/restaurant/hours").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/v1/restaurant/hours").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.PUT, "/v1/restaurant/hours").hasRole(ADMIN)
 
-                    .requestMatchers(HttpMethod.POST, "/v1/restaurant").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/v1/restaurant").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/v1/restaurant").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/v1/restaurant").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.PUT, "/v1/restaurant").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.DELETE, "/v1/restaurant").hasRole(ADMIN)
 
-                    .requestMatchers(HttpMethod.POST, "/v1/product").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/v1/product").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/v1/product").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/v1/product").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.PUT, "/v1/product").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.DELETE, "/v1/product").hasRole(ADMIN)
 
-                    .requestMatchers(HttpMethod.POST, "/v1/category").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.PUT, "/v1/category").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/v1/category").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/v1/category").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.PUT, "/v1/category").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.DELETE, "/v1/category").hasRole(ADMIN)
 
-                    .requestMatchers(HttpMethod.POST, "/v1/image").hasRole("ADMIN")
-                    .requestMatchers(HttpMethod.DELETE, "/v1/image").hasRole("ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/v1/image").hasRole(ADMIN)
+                    .requestMatchers(HttpMethod.DELETE, "/v1/image").hasRole(ADMIN)
+
+                    .requestMatchers(HttpMethod.GET, "/v1/courier").hasAnyRole(OPERATOR, ADMIN)
+                    .requestMatchers(HttpMethod.POST, "/v1/courier").hasAnyRole(OPERATOR, ADMIN)
+
+                    .requestMatchers(HttpMethod.GET, "/v1/courier/ready").hasAnyRole(COURIER, ADMIN)
+                    .requestMatchers(HttpMethod.GET, "/v1/courier/current").hasAnyRole(COURIER, ADMIN)
+                    .requestMatchers(HttpMethod.POST, "/v1/courier/order/**").hasAnyRole(COURIER, ADMIN)
+
+                    .requestMatchers(HttpMethod.POST, "/v1/order").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/v1/order").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/v1/order/**").authenticated()
+                    .requestMatchers(HttpMethod.GET, "/v1/order/restaurant/**").hasAnyRole(OPERATOR, ADMIN)
+                    .requestMatchers(HttpMethod.PUT, "/v1/order/cancel").hasAnyRole(OPERATOR, ADMIN)
+                    .requestMatchers(HttpMethod.PUT, "/v1/order/approve").hasAnyRole(OPERATOR, ADMIN)
+                    .requestMatchers(HttpMethod.PUT, "/v1/order/ready").hasAnyRole(OPERATOR, ADMIN)
 
                     .requestMatchers("/v1/bucket/**").authenticated()
                     .requestMatchers("/v1/bucket").authenticated()
@@ -57,8 +78,8 @@ class SecurityConfig(
                     .requestMatchers("/v1/order/**").authenticated()
                     .requestMatchers("/v1/order").authenticated()
 
-                    .requestMatchers("/v1/admin/**").hasRole("ADMIN")
-                    .requestMatchers("/v1/admin").hasRole("ADMIN")
+                    .requestMatchers("/v1/admin/**").hasRole(ADMIN)
+                    .requestMatchers("/v1/admin").hasRole(ADMIN)
                     .anyRequest().permitAll()
             }
             .exceptionHandling { exception ->
