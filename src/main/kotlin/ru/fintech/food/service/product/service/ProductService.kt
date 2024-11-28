@@ -57,7 +57,9 @@ class ProductServiceImpl(
         val shortProductDtos = products.content.map { ProductMapper.ShortProductDto(it) }
         log.debug("Возвращаем значения из бд в размере: {}", products.size)
 
-        products.content.forEach { product ->
+        products.content
+            .filter { it.available }
+            .forEach { product ->
             val fullProductDto = ProductMapper.FullProductDto(product)
             redisProductRepository.saveMenuItem(product.id.toString(), fullProductDto)
         }

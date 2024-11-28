@@ -1,5 +1,6 @@
 package ru.fintech.food.service.product.repository
 
+import java.util.Optional
 import java.util.UUID
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -12,6 +13,7 @@ import ru.fintech.food.service.product.entity.Product
 @Repository
 interface ProductRepository : JpaRepository<Product, UUID> {
     fun findByAvailableIsFalse(): List<Product>
+    fun findByIdAndAvailableIsTrue(productId: UUID): Optional<Product>
     fun findProductByName(name: String): Product?
     fun existsByImageId(imageId: UUID): Boolean
 

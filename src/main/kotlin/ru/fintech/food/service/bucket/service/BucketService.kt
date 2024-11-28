@@ -1,5 +1,6 @@
 package ru.fintech.food.service.bucket.service
 
+import java.util.UUID
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -14,7 +15,6 @@ import ru.fintech.food.service.common.exception.BadRequestException
 import ru.fintech.food.service.product.exception.ProductNotFoundException
 import ru.fintech.food.service.product.repository.ProductRepository
 import ru.fintech.food.service.user.dto.user.UserDto
-import java.util.UUID
 
 interface BucketService {
     fun addProduct(userDto: UserDto, productId: UUID, amount: Int): ProductInBucketDto
@@ -34,7 +34,7 @@ class BucketServiceImpl(
             throw BadRequestException("Количество продуктов должно быть больше 0")
         }
 
-        val product = productRepository.findById(productId)
+        val product = productRepository.findByIdAndAvailableIsTrue(productId)
             .orElseThrow { ProductNotFoundException(productId) }
 
         var productInBucket = bucketRepository.findByUserIdAndProductId(userDto.id, productId)
